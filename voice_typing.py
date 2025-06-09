@@ -65,7 +65,7 @@ class TrayIconManager:
 
 # --- Hotkey Listener ---
 class HotkeyManager:
-    def __init__(self, config: 'Config', state_ref, tray_icon_manager):
+    def __init__(self, config: Config, state_ref, tray_icon_manager):
         self.config = config
         self.state_ref = state_ref
         self.tray_icon_manager = tray_icon_manager
@@ -111,7 +111,7 @@ class GlobalState:
 
 # --- Vosk Speech Recognition & Typing Automation ---
 class AudioProcessor:
-    def __init__(self, config: 'Config', state_ref: 'GlobalState'):
+    def __init__(self, config: Config, state_ref: GlobalState):
         if not os.path.exists(config.MODEL_PATH):
             print("[AudioProcessor] ❌ Vosk model not found. Download and extract it to:")
             print(f"[AudioProcessor] {config.MODEL_PATH}")
@@ -140,7 +140,7 @@ class AudioProcessor:
 
 # --- Voice Typing Main Loop ---
 class VoiceTyping:
-    def __init__(self, config: 'Config', state_ref, audio_processor: 'AudioProcessor', tray_icon_manager: 'TrayIconManager'):
+    def __init__(self, config: Config, state_ref, audio_processor: AudioProcessor, tray_icon_manager: TrayIconManager):
         self.config = config
         self.state_ref = state_ref
         self.audio_processor = audio_processor
