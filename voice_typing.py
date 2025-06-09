@@ -52,6 +52,12 @@ class TrayIconManager:
         self.update_icon()
         self.icon.run()
 
+# --- Configuration ---
+class Config:
+    MODEL_PATH = os.path.expanduser("/opt/vosk-model-small-en-us-0.15")
+    SAMPLE_RATE = 16000
+    HOTKEY_COMBO = {keyboard.Key.ctrl, keyboard.Key.shift}
+
 # --- Hotkey Listener ---
 class HotkeyManager:
     def __init__(self, config: Config, state_ref, tray_icon_manager):
@@ -84,12 +90,6 @@ class HotkeyManager:
         print("[HotkeyManager] Starting hotkey listener thread")
         with keyboard.Listener(on_press=self.on_press, on_release=self.on_release) as listener:
             listener.join()
-
-# --- Configuration ---
-class Config:
-    MODEL_PATH = os.path.expanduser("/opt/vosk-model-small-en-us-0.15")
-    SAMPLE_RATE = 16000
-    HOTKEY_COMBO = {keyboard.Key.ctrl, keyboard.Key.shift}
 
 # --- Global State ---
 class GlobalState:
