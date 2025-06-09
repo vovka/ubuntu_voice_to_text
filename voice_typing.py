@@ -4,6 +4,7 @@ import json
 import threading
 import subprocess
 import time
+import sys
 
 import sounddevice as sd
 import vosk
@@ -45,9 +46,19 @@ class TrayIconManager:
             else:
                 self.icon.title = "Voice Typing: OFF"
 
+    def exit_application(self, icon, item):
+        """Exit the application cleanly."""
+        print("[TrayIconManager] Exit requested from tray menu")
+        icon.stop()
+        os._exit(0)
+
     def tray_thread(self):
         print("[TrayIconManager] Starting tray icon thread")
-        self.icon = pystray.Icon('voice_typing')
+        # Create menu with Exit item
+        menu = pystray.Menu(
+            pystray.MenuItem('Exit', self.exit_application)
+        )
+        self.icon = pystray.Icon('voice_typing', menu=menu)
         self.state_ref.icon = self.icon
         self.update_icon()
         self.icon.run()
