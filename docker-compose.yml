@@ -2,17 +2,19 @@ version: '3.8'
 
 services:
   voice-typing:
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile  # Default: Alpine (smaller image)
       # Alternative: Use Dockerfile.ubuntu for Ubuntu base
     container_name: ubuntu-voice-to-text
     network_mode: host
     privileged: true
+    user: "${UID}:${GID}"
     environment:
       - DISPLAY=${DISPLAY}
       - PULSE_RUNTIME_PATH=/run/user/1000/pulse
       - XDG_RUNTIME_DIR=/run/user/1000
+      - XAUTHORITY=/home/${USER}/.Xauthority
     volumes:
       # X11 socket for GUI access
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
@@ -21,7 +23,8 @@ services:
       # Alternative audio device access
       - /dev/snd:/dev/snd:rw
       # Vosk model directory (download model locally first)
-      - ./vosk-model:/opt/vosk-model-small-en-us-0.15:ro
+      - /opt/vosk-model-small-en-us-0.15:/opt/vosk-model-small-en-us-0.15:ro
+      - /home/${USER}/.Xauthority:/home/${USER}/.Xauthority:rw
     devices:
       # Audio devices
       - /dev/snd:/dev/snd
@@ -31,7 +34,7 @@ services:
 
   # Alternative Ubuntu-based service
   voice-typing-ubuntu:
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile.ubuntu
     container_name: ubuntu-voice-to-text-ubuntu

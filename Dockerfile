@@ -1,25 +1,22 @@
-FROM alpine:3.18
+FROM python:3.11-slim
 
-# Update Alpine repositories to fix network issues
-RUN sed -i 's|https://dl-cdn.alpinelinux.org|http://mirror1.hs-esslingen.de/pub/Mirrors/alpine|' /etc/apk/repositories || true
+# # Update Alpine repositories to fix network issues
+# RUN sed -i 's|https://dl-cdn.alpinelinux.org|http://mirror1.hs-esslingen.de/pub/Mirrors/alpine|' /etc/apk/repositories || true
 
 # Install system dependencies
-RUN apk update && apk add --no-cache \
-    python3 \
-    py3-pip \
+RUN apt-get update && apt-get install -y \
     python3-dev \
     xdotool \
     pulseaudio \
     alsa-utils \
-    portaudio-dev \
-    build-base \
+    portaudio19-dev \
     wget \
     unzip \
-    py3-pillow \
-    ca-certificates \
+    python3-pil \
     gcc \
-    musl-dev \
-    linux-headers
+    build-essential \
+    linux-headers-amd64 \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create application directory
 WORKDIR /app
