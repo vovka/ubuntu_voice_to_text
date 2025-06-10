@@ -23,7 +23,7 @@ services:
       # Alternative audio device access
       - /dev/snd:/dev/snd:rw
       # Vosk model directory (download model locally first)
-      - /opt/vosk-model-small-en-us-0.15:/opt/vosk-model-small-en-us-0.15:ro
+      - ./vosk-model:/opt/vosk-model-small-en-us-0.15:ro
       - /home/${USER}/.Xauthority:/home/${USER}/.Xauthority:rw
     devices:
       # Audio devices
@@ -31,6 +31,42 @@ services:
     stdin_open: true
     tty: true
     restart: unless-stopped
+
+  # Test runner service
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ubuntu-voice-to-text-test
+    command: ["test"]
+    volumes:
+      - .:/app/src:ro  # Mount source for development
+    profiles:
+      - test
+
+  # Lint runner service  
+  lint:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ubuntu-voice-to-text-lint
+    command: ["lint"]
+    volumes:
+      - .:/app/src:ro  # Mount source for development
+    profiles:
+      - test
+
+  # Code formatter service
+  format:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ubuntu-voice-to-text-format
+    command: ["format"]
+    volumes:
+      - .:/app/src:rw  # Mount source for writing formatted files
+    profiles:
+      - test
 
   # Alternative Ubuntu-based service
   voice-typing-ubuntu:

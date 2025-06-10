@@ -114,9 +114,82 @@ See [DOCKER.md](DOCKER.md) for comprehensive Docker setup and usage instructions
 - Ensure Vosk model is properly downloaded and extracted
 - Check model path configuration
 
+## Development
+
+### Running Tests
+
+This project includes a comprehensive test suite using pytest. Tests can be run locally or via Docker.
+
+#### Local Testing
+
+1. **Install test dependencies:**
+   ```bash
+   pip install pytest pytest-cov coverage flake8 black
+   ```
+
+2. **Run tests:**
+   ```bash
+   # Run all tests with coverage
+   pytest tests/ --cov=. --cov-report=term-missing -v
+   
+   # Run only smoke tests
+   pytest tests/test_smoke.py -v
+   ```
+
+3. **Run linting:**
+   ```bash
+   # Check code style
+   flake8 . --max-line-length=88
+   
+   # Check code formatting
+   black --check --diff .
+   
+   # Auto-format code
+   black .
+   ```
+
+#### Docker Testing
+
+Run tests in an isolated Docker container:
+
+```bash
+# Run tests
+docker-compose --profile test run --rm test
+
+# Run linting
+docker-compose --profile test run --rm lint
+
+# Format code
+docker-compose --profile test run --rm format
+
+# Run all checks (build and test in one command)
+docker-compose build && docker-compose --profile test run --rm test && docker-compose --profile test run --rm lint
+```
+
+#### CI/CD
+
+The project includes GitHub Actions workflow that automatically:
+- Tests on multiple Python versions (3.8-3.12)
+- Runs linting with flake8
+- Checks code formatting with black
+- Generates coverage reports
+
+### Code Quality
+
+- **Test Framework**: pytest with coverage reporting
+- **Linting**: flake8 for code quality checks
+- **Formatting**: black for consistent code style
+- **Coverage**: Aim for high test coverage of core functionality
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit issues, feature requests, or pull requests.
+
+Before submitting a pull request:
+1. Run the test suite: `pytest tests/`
+2. Check code style: `flake8 . --max-line-length=88`
+3. Format code: `black .`
+4. Ensure all CI checks pass
 
 ## License
 
