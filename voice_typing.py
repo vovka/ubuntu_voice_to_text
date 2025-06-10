@@ -71,10 +71,11 @@ class Config:
 
 # --- Hotkey Listener ---
 class HotkeyManager:
-    def __init__(self, config: Config, state_ref, tray_icon_manager):
+    def __init__(self, config: Config, state_ref, tray_icon_manager, audio_processor=None):
         self.config = config
         self.state_ref = state_ref
         self.tray_icon_manager = tray_icon_manager
+        self.audio_processor = audio_processor
         self._combo_pressed = False  # Track if combo was pressed
 
     def on_press(self, key):
@@ -107,6 +108,9 @@ class HotkeyManager:
         if self.state_ref.state != new_state:
             self.state_ref.state = new_state
             print(f"[HotkeyManager] Voice typing state: {self.state_ref.state}")
+            # Reset listening timer when starting to listen (requirement: timer reset)
+            if new_state == 'listening' and self.audio_processor:
+                self.audio_processor.start_listening()
             self.tray_icon_manager.update_icon()
 
     def hotkey_thread(self):
@@ -132,6 +136,13 @@ class AudioProcessor:
         self.model = vosk.Model(config.MODEL_PATH)
         self.recognizer = vosk.KaldiRecognizer(self.model, config.SAMPLE_RATE)
         self.last_text_at = None
+        self.listening_started_at = None
+
+    def start_listening(self):
+        """Reset timers when listening starts to enable inactivity timeout"""
+        self.listening_started_at = time.time()
+        self.last_text_at = None
+        print(f"[AudioProcessor] Listening started at {self.listening_started_at}")
 
     def process_buffer(self, buffer):
         for chunk in buffer:
@@ -142,7 +153,19 @@ class AudioProcessor:
             self.last_text_at = time.time()
             print(f"[AudioProcessor] 🗣️ {result['text']}")
             self.type_text(result["text"])
-        if self.state_ref.state == 'finish_listening' and self.last_text_at is not None and time.time() - self.last_text_at > 5:
+        
+        # Auto-disable after 5 seconds of inactivity (requirement: inactivity timeout)
+        current_time = time.time()
+        
+        # For 'listening' state: check if 5 seconds passed since last text OR listening start
+        if self.state_ref.state == 'listening' and self.listening_started_at is not None:
+            time_since_last_activity = current_time - (self.last_text_at if self.last_text_at else self.listening_started_at)
+            if time_since_last_activity > 5:
+                print("[AudioProcessor] listening state: auto-disabling after 5 seconds of inactivity")
+                self.state_ref.state = 'idle'
+        
+        # For 'finish_listening' state: existing timeout logic (preserved for manual stop flow)
+        elif self.state_ref.state == 'finish_listening' and self.last_text_at is not None and current_time - self.last_text_at > 5:
             print("[AudioProcessor] finish_listening state: resetting to idle")
             self.state_ref.state = 'idle'
 
@@ -187,7 +210,7 @@ if __name__ == "__main__":
     state_ref = GlobalState()
     audio_processor = AudioProcessor(config, state_ref)
     tray_icon_manager = TrayIconManager(state_ref)
-    hotkey_manager = HotkeyManager(config, state_ref, tray_icon_manager)
+    hotkey_manager = HotkeyManager(config, state_ref, tray_icon_manager, audio_processor)
     voice_typing = VoiceTyping(config, state_ref, audio_processor, tray_icon_manager)
 
     # print("[trace] Starting tray and hotkey threads")
