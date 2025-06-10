@@ -25,9 +25,12 @@ WORKDIR /app
 COPY voice_typing.py .
 COPY voice_typing.sh .
 COPY requirements.txt .
+COPY pyproject.toml .
+COPY tests/ tests/
+COPY docker-entrypoint.sh .
 
-# Make shell script executable
-RUN chmod +x voice_typing.sh
+# Make shell script and entrypoint executable
+RUN chmod +x voice_typing.sh docker-entrypoint.sh
 
 # Create directory for Vosk model (to be mounted at runtime)
 RUN mkdir -p /opt/vosk-model-small-en-us-0.15
@@ -36,40 +39,17 @@ RUN mkdir -p /opt/vosk-model-small-en-us-0.15
 RUN python3 -m venv /app/venv && \
     /app/venv/bin/pip install --upgrade pip --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org && \
     /app/venv/bin/pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org \
-        sounddevice vosk pyaudio keyboard pynput pystray pillow
+        sounddevice vosk pyaudio keyboard pynput pystray pillow && \
+    /app/venv/bin/pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org \
+        pytest pytest-cov coverage flake8 black
 
 # Set environment variables for audio and display
 ENV PULSE_RUNTIME_PATH=/run/user/1000/pulse
 ENV XDG_RUNTIME_DIR=/run/user/1000
 ENV DISPLAY=:0
 
-# Create entrypoint script with improved model validation
-RUN echo '#!/bin/bash\n\
-# Activate virtual environment\n\
-source /app/venv/bin/activate\n\
-\n\
-# Check if Vosk model is available\n\
-MODEL_PATH="/opt/vosk-model-small-en-us-0.15"\n\
-if [ ! -d "$MODEL_PATH" ] || [ ! "$(ls -A $MODEL_PATH)" ]; then\n\
-    echo "❌ Vosk model not found at $MODEL_PATH"\n\
-    echo "Please ensure the model is mounted or downloaded:"\n\
-    echo "  1. Run ./download-model.sh to download the model locally"\n\
-    echo "  2. Mount it with: -v ./vosk-model:/opt/vosk-model-small-en-us-0.15:ro"\n\
-    echo ""\n\
-    echo "For CI/CD environments, ensure the model is downloaded in a setup step:"\n\
-    echo "  mkdir -p vosk-model"\n\
-    echo "  wget -O model.zip https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip"\n\
-    echo "  unzip model.zip && mv vosk-model-small-en-us-0.15/* vosk-model/"\n\
-    exit 1\n\
-fi\n\
-\n\
-echo "✅ Vosk model found at $MODEL_PATH"\n\
-\n\
-# Run the application\n\
-python3 /app/voice_typing.py\n\
-' > /app/entrypoint.sh && chmod +x /app/entrypoint.sh
 
 # Expose any necessary ports (none needed for this app)
 
 # Set the entrypoint
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
