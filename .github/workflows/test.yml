@@ -24,8 +24,8 @@ jobs:
     - name: Install test dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pytest pytest-cov coverage flake8 black
-
+        pip install pytest pytest-cov coverage flake8 black  vosk sounddevice
+        
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
