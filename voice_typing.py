@@ -58,14 +58,11 @@ class TrayIconManager:
     def tray_thread(self):
         print("[TrayIconManager] Starting tray icon thread")
         # Create menu with Exit item
-        menu = pystray.Menu(
-            pystray.MenuItem('Exit', self.exit_application)
-        )
-        self.icon = pystray.Icon('voice_typing', menu=menu)
+        menu = pystray.Menu(pystray.MenuItem("Exit", self.exit_application))
+        self.icon = pystray.Icon("voice_typing", menu=menu)
         self.state_ref.icon = self.icon
         self.update_icon()
         self.icon.run()
-
 
 # --- Configuration ---
 class Config:
