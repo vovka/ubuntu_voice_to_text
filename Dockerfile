@@ -48,7 +48,6 @@ ENV PULSE_RUNTIME_PATH=/run/user/1000/pulse
 ENV XDG_RUNTIME_DIR=/run/user/1000
 ENV DISPLAY=:0
 
-
 # Expose any necessary ports (none needed for this app)
 
 # Set the entrypoint
