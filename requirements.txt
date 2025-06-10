@@ -1,0 +1,5 @@
+vosk
+keyboard
+pynput
+pystray
+pillow
