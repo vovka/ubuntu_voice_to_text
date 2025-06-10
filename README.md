@@ -6,6 +6,7 @@ A simple voice-to-text application for Ubuntu that provides hands-free text inpu
 
 - **Voice Recognition**: Uses Vosk for offline speech recognition
 - **Hotkey Activation**: Press and release Ctrl+Shift to toggle voice recording
+- **Auto-Disable**: Automatically stops listening after 5 seconds of silence
 - **System Tray Integration**: Convenient tray icon for status monitoring
 - **Real-time Processing**: Immediate text typing after speech recognition
 - **No Internet Required**: Offline operation after initial setup
@@ -51,7 +52,9 @@ For detailed Docker setup instructions, see [DOCKER.md](DOCKER.md).
 2. **Look for the system tray icon** (circle that changes color based on status)
 3. **Press and release Ctrl+Shift** to activate voice recording (icon turns green)
 4. **Speak clearly** after releasing the keys
-5. **Press Ctrl+Shift again** to stop recording and process speech
+5. **Stop recording** by either:
+   - **Manual**: Press Ctrl+Shift again to immediately stop recording
+   - **Automatic**: Wait 5 seconds after your last speech and recording will automatically stop
 
 ### Status Indicators
 

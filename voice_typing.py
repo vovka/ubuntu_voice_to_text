@@ -108,7 +108,7 @@ class HotkeyManager:
         if self.state_ref.state != new_state:
             self.state_ref.state = new_state
             print(f"[HotkeyManager] Voice typing state: {self.state_ref.state}")
-            # Reset listening timer when starting to listen
+            # Reset listening timer when starting to listen (requirement: timer reset)
             if new_state == 'listening' and self.audio_processor:
                 self.audio_processor.start_listening()
             self.tray_icon_manager.update_icon()
@@ -139,7 +139,7 @@ class AudioProcessor:
         self.listening_started_at = None
 
     def start_listening(self):
-        """Reset timers when listening starts"""
+        """Reset timers when listening starts to enable inactivity timeout"""
         self.listening_started_at = time.time()
         self.last_text_at = None
         print(f"[AudioProcessor] Listening started at {self.listening_started_at}")
@@ -154,7 +154,7 @@ class AudioProcessor:
             print(f"[AudioProcessor] 🗣️ {result['text']}")
             self.type_text(result["text"])
         
-        # Auto-disable after 5 seconds of inactivity
+        # Auto-disable after 5 seconds of inactivity (requirement: inactivity timeout)
         current_time = time.time()
         
         # For 'listening' state: check if 5 seconds passed since last text OR listening start
@@ -164,7 +164,7 @@ class AudioProcessor:
                 print("[AudioProcessor] listening state: auto-disabling after 5 seconds of inactivity")
                 self.state_ref.state = 'idle'
         
-        # For 'finish_listening' state: existing timeout logic
+        # For 'finish_listening' state: existing timeout logic (preserved for manual stop flow)
         elif self.state_ref.state == 'finish_listening' and self.last_text_at is not None and current_time - self.last_text_at > 5:
             print("[AudioProcessor] finish_listening state: resetting to idle")
             self.state_ref.state = 'idle'
