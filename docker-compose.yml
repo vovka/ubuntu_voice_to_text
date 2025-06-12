@@ -8,7 +8,7 @@ services:
       # Alternative: Use Dockerfile.ubuntu for Ubuntu base
     container_name: ubuntu-voice-to-text
     network_mode: host
-    privileged: true
+    # privileged: true # looks like it is working without this
     user: "${UID}:${GID}"
     environment:
       - DISPLAY=${DISPLAY}
@@ -23,8 +23,9 @@ services:
       # Alternative audio device access
       - /dev/snd:/dev/snd:rw
       # Vosk model directory (download model locally first)
-      - ./vosk-model:/opt/vosk-model-small-en-us-0.15:ro # this is for CI
-      # - /opt/vosk-model-small-en-us-0.15:/opt/vosk-model-small-en-us-0.15:ro # this is for development
+      # - ./vosk-model:/opt/vosk-model-small-en-us-0.15:ro # this is for CI
+      # - .:/app:rw  # Mount source for development
+      - /opt/vosk-model-small-en-us-0.15:/opt/vosk-model-small-en-us-0.15:ro # this is for development
       - /home/${USER}/.Xauthority:/home/${USER}/.Xauthority:rw
     devices:
       # Audio devices
@@ -45,7 +46,7 @@ services:
     profiles:
       - test
 
-  # Lint runner service  
+  # Lint runner service
   lint:
     build:
       context: .
