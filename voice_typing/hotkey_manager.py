@@ -10,17 +10,17 @@ class HotkeyManager:
         self._combo_pressed = False  # Track if combo was pressed
 
     def on_press(self, key):
-        if hasattr(self.config, 'HOTKEY_COMBO') and key in self.config.HOTKEY_COMBO:
+        if key in self.config.HOTKEY_COMBO:
             self.state_ref.current_keys.add(key)
         # Set flag if combo is pressed down
-        if hasattr(self.config, 'HOTKEY_COMBO') and self.state_ref.current_keys == self.config.HOTKEY_COMBO:
+        if self.state_ref.current_keys == self.config.HOTKEY_COMBO:
             self._combo_pressed = True
 
     def on_release(self, key):
         if key in self.state_ref.current_keys:
             self.state_ref.current_keys.remove(key)
         # If we're currently listening and any combo key is released, stop listening
-        if self.state_ref.state == 'listening' and hasattr(self.config, 'HOTKEY_COMBO') and key in self.config.HOTKEY_COMBO:
+        if self.state_ref.state == 'listening' and key in self.config.HOTKEY_COMBO:
             print("[HotkeyManager] HOTKEY_COMBO released while listening")
             self._combo_pressed = False  # Reset the flag to prevent starting again
             self.set_state('finish_listening')

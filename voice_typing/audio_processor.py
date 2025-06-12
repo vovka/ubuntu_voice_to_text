@@ -9,7 +9,7 @@ class AudioProcessor:
         if not os.path.exists(config.MODEL_PATH):
             print("[AudioProcessor] ❌ Vosk model not found. Download and extract it to:")
             print(f"[AudioProcessor] {config.MODEL_PATH}")
-            exit(1)
+            sys.exit(1)
         self.state_ref = state_ref
         
         try:

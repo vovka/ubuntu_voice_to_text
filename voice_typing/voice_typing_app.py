@@ -11,7 +11,7 @@ class VoiceTyping:
         self.tray_icon_manager = tray_icon_manager
 
     def audio_callback(self, indata, frames, time, status):
-        if True: # self.state_ref.state in ('listening', 'finish_listening'):
+        if self.state_ref.state in ('listening', 'finish_listening'):
             print(f"[VoiceTyping] Audio callback: putting audio data in queue (state={self.state_ref.state})")
             self.state_ref.q.put(bytes(indata))
 
