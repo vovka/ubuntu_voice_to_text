@@ -25,7 +25,7 @@ RUN apk update && apk add --no-cache \
 WORKDIR /app
 
 # Copy application files
-COPY voice_typing.py .
+COPY main.py .
 COPY voice_typing.sh .
 COPY requirements.txt .
 
@@ -69,7 +69,7 @@ fi\n\
 echo "✅ Vosk model found at $MODEL_PATH"\n\
 \n\
 # Run the application\n\
-python3 /app/voice_typing.py\n\
+python3 /app/main.py\n\
 ' > /app/entrypoint.sh && chmod +x /app/entrypoint.sh
 
 # Expose any necessary ports (none needed for this app)

@@ -20,4 +20,4 @@ pip install sounddevice vosk pyaudio xdotool keyboard pynput pystray
 # sudo setcap cap_net_admin,cap_net_raw+eip $(readlink -f $(which python3))
 
 # Step 4: Run the voice typing script
-python3 $HOME/bin/voice_typing.py
+python3 $HOME/bin/main.py
