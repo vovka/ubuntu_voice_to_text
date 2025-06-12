@@ -4,7 +4,6 @@ import json
 import threading
 import subprocess
 import time
-import sys
 
 import sounddevice as sd
 import vosk

@@ -11,17 +11,23 @@ RUN apt-get update && apt-get install -y \
     alsa-utils \
     portaudio19-dev \
     wget \
+    curl \
     unzip \
     python3-pil \
     gcc \
     build-essential \
     linux-headers-amd64 \
+    ffmpeg \
+    libsndfile1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Create application directory
 WORKDIR /app
 
-# Copy application files
+# Download and install Vosk model directly into the image
+RUN mkdir -p /opt/vosk-model-small-en-us-0.15
+
+# Copy application files first
 COPY voice_typing.py .
 COPY voice_typing.sh .
 COPY requirements.txt .
@@ -32,8 +38,26 @@ COPY docker-entrypoint.sh .
 # Make shell script and entrypoint executable
 RUN chmod +x voice_typing.sh docker-entrypoint.sh
 
-# Create directory for Vosk model (to be mounted at runtime)
-RUN mkdir -p /opt/vosk-model-small-en-us-0.15
+# Try to copy local model directory if it exists, otherwise try to download
+RUN if [ -d "/app/vosk-model" ] && [ "$(ls -A /app/vosk-model 2>/dev/null)" ]; then \
+        echo "Using locally available model" && \
+        cp -r /app/vosk-model/* /opt/vosk-model-small-en-us-0.15/; \
+    else \
+        echo "Model not found locally, attempting to download..." && \
+        # Try downloading with multiple methods
+        (wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 2 \
+             -O /tmp/vosk-model-small-en-us-0.15.zip \
+             https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip && \
+         unzip /tmp/vosk-model-small-en-us-0.15.zip -d /tmp && \
+         mv /tmp/vosk-model-small-en-us-0.15/* /opt/vosk-model-small-en-us-0.15/ && \
+         rm -rf /tmp/vosk-model-small-en-us-0.15.zip /tmp/vosk-model-small-en-us-0.15) || \
+        # If download fails, create a placeholder directory structure and a README
+        (mkdir -p /opt/vosk-model-small-en-us-0.15/am && \
+         echo "# Vosk Model Download Failed" > /opt/vosk-model-small-en-us-0.15/README.md && \
+         echo "The Vosk model could not be downloaded during build." >> /opt/vosk-model-small-en-us-0.15/README.md && \
+         echo "Please run the download script manually or ensure network access." >> /opt/vosk-model-small-en-us-0.15/README.md && \
+         echo "Download the model from: https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip" >> /opt/vosk-model-small-en-us-0.15/README.md); \
+    fi
 
 # Create virtual environment and install Python dependencies at build time
 RUN python3 -m venv /app/venv && \

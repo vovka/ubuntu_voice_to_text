@@ -8,7 +8,7 @@ This document provides instructions for running the Ubuntu Voice to Text applica
 - Docker Compose (optional, for easier management)
 - A working audio input device (microphone)
 - X11 server running (for GUI components)
-- Internet connection (for downloading Python dependencies and Vosk model)
+- Internet connection (for downloading Python dependencies; Vosk model is included in the image)
 
 ## Quick Start with Docker Compose
 
@@ -18,12 +18,7 @@ This document provides instructions for running the Ubuntu Voice to Text applica
    cd ubuntu_voice_to_text
    ```
 
-2. **Download the Vosk speech recognition model:**
-   ```bash
-   ./download-model.sh
-   ```
-
-3. **Build and run the application:**
+2. **Build and run the application:**
    ```bash
    # Default (Alpine-based, smaller image):
    docker-compose up --build
@@ -32,7 +27,9 @@ This document provides instructions for running the Ubuntu Voice to Text applica
    docker-compose --profile ubuntu up --build voice-typing-ubuntu
    ```
 
-4. **Use the application:**
+   The Vosk speech recognition model is now included in the Docker image, so no separate download is required.
+
+3. **Use the application:**
    - The application will start with a system tray icon
    - Hold `Ctrl+Shift` to activate voice recording
    - Speak while holding the keys
@@ -44,30 +41,22 @@ This project provides two Docker image variants:
 
 ### Alpine-based (Default)
 - **Dockerfile**: `Dockerfile` (default)
-- **Image size**: ~150MB
+- **Image size**: ~200MB (includes Vosk model)
 - **Use case**: Production deployments where size matters
 - **Build**: `docker-compose up --build`
 
 ### Ubuntu-based
 - **Dockerfile**: `Dockerfile.ubuntu`
-- **Image size**: ~350MB
+- **Image size**: ~400MB (includes Vosk model)
 - **Use case**: Development or when compatibility is preferred
 - **Build**: `docker-compose --profile ubuntu up --build voice-typing-ubuntu`
 
 ## CI/CD Integration
 
-For automated testing and deployment, ensure the Vosk model is available:
+The Docker image now includes the Vosk model, simplifying CI/CD pipelines.
 
 ### GitHub Actions / CI Pipeline Setup
 ```yaml
-- name: Download Vosk Model
-  run: |
-    mkdir -p vosk-model
-    wget -O model.zip https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip
-    unzip model.zip
-    mv vosk-model-small-en-us-0.15/* vosk-model/
-    rm -rf vosk-model-small-en-us-0.15 model.zip
-
 - name: Build and Test Docker Image
   run: |
     docker-compose build
@@ -76,16 +65,7 @@ For automated testing and deployment, ensure the Vosk model is available:
 
 ### Manual CI Setup
 ```bash
-# Ensure Vosk model is available
-MODEL_DIR="vosk-model"
-mkdir -p $MODEL_DIR
-if [ ! "$(ls -A $MODEL_DIR)" ]; then
-    wget -O model.zip https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip
-    unzip model.zip && mv vosk-model-small-en-us-0.15/* vosk-model/
-    rm -rf vosk-model-small-en-us-0.15 model.zip
-fi
-
-# Build and run
+# Build and run - no model download required
 docker-compose up --build
 ```
 
@@ -114,7 +94,6 @@ docker run -it --rm \
   -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
   -v /run/user/1000/pulse:/run/user/1000/pulse:rw \
   -v /dev/snd:/dev/snd:rw \
-  -v $(pwd)/vosk-model:/opt/vosk-model-small-en-us-0.15:ro \
   --device /dev/snd:/dev/snd \
   ubuntu-voice-to-text
 ```
@@ -137,12 +116,14 @@ For the system tray icon to work:
 
 ### Vosk Model
 
-The Vosk speech recognition model needs to be downloaded separately:
-1. Run `./download-model.sh` to download the model
-2. The model is mounted as a volume in the container
-3. Alternative: manually download from https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip
+The Vosk speech recognition model is now included directly in the Docker image:
+1. The model is downloaded and installed during the Docker build process
+2. No external volume mounting is required
+3. If network access fails during build, the container will include a placeholder with instructions
 
-**Important**: The application will check for the model at startup and provide clear error messages if missing.
+**Model Location**: The model is installed at `/opt/vosk-model-small-en-us-0.15` within the container.
+
+**Model Configuration**: To use a different model, modify the `MODEL_PATH` in `voice_typing.py` and rebuild the Docker image.
 
 ### Permissions
 
@@ -158,9 +139,15 @@ The container runs in privileged mode to access audio hardware. For enhanced sec
 ❌ Vosk model not found at /opt/vosk-model-small-en-us-0.15
 ```
 **Solution**: 
-1. Run `./download-model.sh` before starting the container
-2. Ensure the `vosk-model` directory contains the extracted model files
-3. For CI/CD: Download model in setup step as shown above
+1. This should not occur with the new image as the model is built-in
+2. If it does occur, rebuild the Docker image: `docker-compose build --no-cache`
+3. Check if there were network issues during the build process
+
+### Model Download Failed During Build
+If you see a message about model download failure:
+1. The container will start but may not function without a model
+2. You can manually download the model and rebuild with: `./download-model.sh && docker-compose build --no-cache`
+3. Ensure internet connectivity during Docker build
 
 ### Python Dependencies Installation Issues
 Dependencies are now installed at build time for better reliability.
@@ -193,8 +180,8 @@ The Dockerfile automatically handles this by switching to alternative mirrors.
 
 ### Custom Model
 To use a different Vosk model:
-1. Modify the `MODEL_PATH` in `voice_typing.py`
-2. Update the volume mount in docker-compose.yml
+1. Modify the `MODEL_PATH` in `voice_typing.py` 
+2. Update the Dockerfile to download your preferred model
 3. Rebuild the image
 
 ### Dependencies
@@ -215,6 +202,7 @@ Python dependencies are managed via `requirements.txt` and installed at build ti
 ## Performance Notes
 
 - Dependencies are now installed at build time for faster startup
+- Vosk model is included in the image, eliminating runtime downloads
 - Audio processing is real-time and CPU-intensive
 - Memory usage depends on the Vosk model size (small model ~50MB)
-- Alpine image is significantly smaller than Ubuntu (150MB vs 350MB)
+- Alpine image is significantly smaller than Ubuntu (~200MB vs ~400MB including model)

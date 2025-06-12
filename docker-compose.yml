@@ -22,9 +22,6 @@ services:
       - /run/user/1000/pulse:/run/user/1000/pulse:rw
       # Alternative audio device access
       - /dev/snd:/dev/snd:rw
-      # Vosk model directory (download model locally first)
-      - ./vosk-model:/opt/vosk-model-small-en-us-0.15:ro # this is for CI
-      # - /opt/vosk-model-small-en-us-0.15:/opt/vosk-model-small-en-us-0.15:ro # this is for development
       - /home/${USER}/.Xauthority:/home/${USER}/.Xauthority:rw
     devices:
       # Audio devices
@@ -88,8 +85,6 @@ services:
       - /run/user/1000/pulse:/run/user/1000/pulse:rw
       # Alternative audio device access
       - /dev/snd:/dev/snd:rw
-      # Vosk model directory (download model locally first)
-      - ./vosk-model:/opt/vosk-model-small-en-us-0.15:ro
     devices:
       # Audio devices
       - /dev/snd:/dev/snd

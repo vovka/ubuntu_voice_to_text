@@ -21,15 +21,12 @@ A simple voice-to-text application for Ubuntu that provides hands-free text inpu
    cd ubuntu_voice_to_text
    ```
 
-2. **Download the speech recognition model:**
-   ```bash
-   ./download-model.sh
-   ```
-
-3. **Run with Docker Compose:**
+2. **Run with Docker Compose:**
    ```bash
    docker-compose up --build
    ```
+
+The Docker image now includes the Vosk speech recognition model, so no additional downloads are required.
 
 For detailed Docker setup instructions, see [DOCKER.md](DOCKER.md).
 
