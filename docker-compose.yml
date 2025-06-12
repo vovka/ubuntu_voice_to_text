@@ -23,7 +23,7 @@ services:
       # Alternative audio device access
       - /dev/snd:/dev/snd:rw
       - /home/${USER}/.Xauthority:/home/${USER}/.Xauthority:rw
-      # Vosk model persistence directory (now as a named volume). Also need to chmow in host OS (since this container runs as non-root user):
+      # Vosk model persistence directory (now as a named volume). Also need to chown in host OS (since this container runs as non-root user):
       # `sudo chown -R $(id -u):$(id -g) /var/lib/docker/volumes/ubuntu_voice_to_text_vosk-models/_data`
       - vosk-models:/models:rw
     devices:
