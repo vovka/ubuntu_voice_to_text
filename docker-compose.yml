@@ -23,6 +23,8 @@ services:
       # Alternative audio device access
       - /dev/snd:/dev/snd:rw
       - /home/${USER}/.Xauthority:/home/${USER}/.Xauthority:rw
+      # Vosk model persistence directory
+      - ./vosk-models:/models:rw
     devices:
       # Audio devices
       - /dev/snd:/dev/snd
@@ -85,7 +87,8 @@ services:
       - /run/user/1000/pulse:/run/user/1000/pulse:rw
       # Alternative audio device access
       - /dev/snd:/dev/snd:rw
-    devices:
+      # Vosk model persistence directory
+      - ./vosk-models:/models:rw
       # Audio devices
       - /dev/snd:/dev/snd
     stdin_open: true

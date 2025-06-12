@@ -64,7 +64,7 @@ class TrayIconManager:
 
 # --- Configuration ---
 class Config:
-    MODEL_PATH = os.path.expanduser("/opt/vosk-model-small-en-us-0.15")
+    MODEL_PATH = os.path.expanduser("/models/vosk-model-small-en-us-0.15")
     SAMPLE_RATE = 16000
     HOTKEY_COMBO = {keyboard.Key.ctrl, keyboard.Key.shift}
 

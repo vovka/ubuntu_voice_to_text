@@ -8,7 +8,7 @@ This document provides instructions for running the Ubuntu Voice to Text applica
 - Docker Compose (optional, for easier management)
 - A working audio input device (microphone)
 - X11 server running (for GUI components)
-- Internet connection (for downloading Python dependencies; Vosk model is included in the image)
+- Internet connection (for downloading Python dependencies and Vosk model on first run)
 
 ## Quick Start with Docker Compose
 
@@ -27,7 +27,7 @@ This document provides instructions for running the Ubuntu Voice to Text applica
    docker-compose --profile ubuntu up --build voice-typing-ubuntu
    ```
 
-   The Vosk speech recognition model is now included in the Docker image, so no separate download is required.
+   The Vosk speech recognition model is automatically downloaded and cached on first run.
 
 3. **Use the application:**
    - The application will start with a system tray icon
@@ -41,13 +41,13 @@ This project provides two Docker image variants:
 
 ### Alpine-based (Default)
 - **Dockerfile**: `Dockerfile` (default)
-- **Image size**: ~200MB (includes Vosk model)
+- **Image size**: ~150MB (model downloaded separately)
 - **Use case**: Production deployments where size matters
 - **Build**: `docker-compose up --build`
 
 ### Ubuntu-based
 - **Dockerfile**: `Dockerfile.ubuntu`
-- **Image size**: ~400MB (includes Vosk model)
+- **Image size**: ~300MB (model downloaded separately)
 - **Use case**: Development or when compatibility is preferred
 - **Build**: `docker-compose --profile ubuntu up --build voice-typing-ubuntu`
 
@@ -94,6 +94,7 @@ docker run -it --rm \
   -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
   -v /run/user/1000/pulse:/run/user/1000/pulse:rw \
   -v /dev/snd:/dev/snd:rw \
+  -v ./vosk-models:/models:rw \
   --device /dev/snd:/dev/snd \
   ubuntu-voice-to-text
 ```
@@ -116,14 +117,20 @@ For the system tray icon to work:
 
 ### Vosk Model
 
-The Vosk speech recognition model is now included directly in the Docker image:
-1. The model is downloaded and installed during the Docker build process
-2. No external volume mounting is required
-3. If network access fails during build, the container will include a placeholder with instructions
+The Vosk speech recognition model is automatically managed by the container:
+1. On first run, the model is downloaded automatically from the internet
+2. The model is cached in the `./vosk-models` directory on the host
+3. Subsequent runs use the cached model, making startup faster
+4. No manual intervention is required
 
-**Model Location**: The model is installed at `/opt/vosk-model-small-en-us-0.15` within the container.
+**Model Location**: The model is stored at `/models/vosk-model-small-en-us-0.15` within the container.
 
-**Model Configuration**: To use a different model, modify the `MODEL_PATH` in `voice_typing.py` and rebuild the Docker image.
+**Model Persistence**: The `./vosk-models` directory persists the model across:
+- Container restarts
+- Container rebuilds  
+- Host system reboots
+
+**Model Configuration**: To use a different model, modify the `MODEL_PATH` in `voice_typing.py`. The entrypoint will automatically download the new model.
 
 ### Permissions
 
@@ -134,20 +141,27 @@ The container runs in privileged mode to access audio hardware. For enhanced sec
 
 ## Troubleshooting
 
-### Model Not Found Error
+### Model Download Failed
 ```
-❌ Vosk model not found at /opt/vosk-model-small-en-us-0.15
+❌ Failed to download Vosk model after 3 attempts
 ```
 **Solution**: 
-1. This should not occur with the new image as the model is built-in
-2. If it does occur, rebuild the Docker image: `docker-compose build --no-cache`
-3. Check if there were network issues during the build process
+1. Check your internet connection
+2. Verify the model URL is accessible
+3. Ensure the `./vosk-models` directory is writable
+4. For offline environments, pre-download the model:
+   ```bash
+   mkdir -p ./vosk-models
+   cd ./vosk-models
+   wget https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip
+   unzip vosk-model-small-en-us-0.15.zip
+   ```
 
-### Model Download Failed During Build
-If you see a message about model download failure:
-1. The container will start but may not function without a model
-2. You can manually download the model and rebuild with: `./download-model.sh && docker-compose build --no-cache`
-3. Ensure internet connectivity during Docker build
+### Model Directory Permission Issues
+If you see permission errors related to the model directory:
+1. Ensure the current user has write access to the project directory
+2. Check Docker permissions: `ls -la ./vosk-models`
+3. If needed, fix permissions: `sudo chown -R $USER:$USER ./vosk-models`
 
 ### Python Dependencies Installation Issues
 Dependencies are now installed at build time for better reliability.
