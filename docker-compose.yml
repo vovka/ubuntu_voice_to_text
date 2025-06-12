@@ -8,7 +8,7 @@ services:
       # Alternative: Use Dockerfile.ubuntu for Ubuntu base
     container_name: ubuntu-voice-to-text
     network_mode: host
-    privileged: true
+    # privileged: true # looks like it is working without this
     user: "${UID}:${GID}"
     environment:
       - DISPLAY=${DISPLAY}
