@@ -8,12 +8,15 @@ from .audio_processor import AudioProcessor
 from .tray_icon_manager import TrayIconManager
 from .hotkey_manager import HotkeyManager
 from .voice_typing_app import VoiceTyping
+from .recognition_sources import VoiceRecognitionSource, VoskRecognitionSource
 
 __all__ = [
-    'Config',
-    'GlobalState', 
-    'AudioProcessor',
-    'TrayIconManager',
-    'HotkeyManager',
-    'VoiceTyping'
+    "Config",
+    "GlobalState",
+    "AudioProcessor",
+    "TrayIconManager",
+    "HotkeyManager",
+    "VoiceTyping",
+    "VoiceRecognitionSource",
+    "VoskRecognitionSource",
 ]

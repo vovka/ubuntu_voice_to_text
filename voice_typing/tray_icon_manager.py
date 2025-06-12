@@ -9,7 +9,7 @@ class TrayIconManager:
     def create_image_text(self, state="idle"):
         try:
             from PIL import Image, ImageDraw
-            
+
             width, height = 32, 32
             image = Image.new("RGBA", (width, height), (255, 255, 255, 0))
             dc = ImageDraw.Draw(image)
@@ -23,12 +23,17 @@ class TrayIconManager:
 
             # Draw a filled circle
             dc.ellipse(
-                [(4, 4), (width - 4, height - 4)], fill=color, outline=(60, 60, 60), width=2
+                [(4, 4), (width - 4, height - 4)],
+                fill=color,
+                outline=(60, 60, 60),
+                width=2,
             )
 
             return image
         except ImportError:
-            print("[TrayIconManager] PIL not available, tray icon functionality disabled")
+            print(
+                "[TrayIconManager] PIL not available, tray icon functionality disabled"
+            )
             return None
 
     def update_icon(self):
@@ -52,6 +57,7 @@ class TrayIconManager:
         print("[TrayIconManager] Starting tray icon thread")
         try:
             import pystray
+
             # Create menu with Exit item
             menu = pystray.Menu(pystray.MenuItem("Exit", self.exit_application))
             self.icon = pystray.Icon("voice_typing", menu=menu)
@@ -59,4 +65,6 @@ class TrayIconManager:
             self.update_icon()
             self.icon.run()
         except ImportError:
-            print("[TrayIconManager] pystray not available, tray icon functionality disabled")
+            print(
+                "[TrayIconManager] pystray not available, tray icon functionality disabled"
+            )
