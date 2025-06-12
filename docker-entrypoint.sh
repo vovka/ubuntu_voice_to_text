@@ -105,5 +105,6 @@ else
     fi
 
     # Run the application
-    python3 /app/voice_typing.py
+    export PYTHONPATH=/app
+    python3 /app/main.py
 fi

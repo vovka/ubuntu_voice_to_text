@@ -66,7 +66,7 @@ For detailed Docker setup instructions, see [DOCKER.md](DOCKER.md).
 
 ## Configuration
 
-The application can be configured by modifying `voice_typing.py`:
+The application can be configured by modifying `main.py`:
 
 - **Model Path**: Change `MODEL_PATH` to use a different Vosk model
 - **Sample Rate**: Adjust `SAMPLE_RATE` for audio quality
@@ -90,7 +90,7 @@ When using Docker, the model is automatically managed:
 #### Manual Model Management
 
 To use a different model:
-1. Update the `MODEL_PATH` in `voice_typing.py`
+1. Update the `MODEL_PATH` in `main.py`
 2. For Docker: The entrypoint will automatically download the new model
 3. For manual installation: Download the model manually and update the path
 
@@ -160,7 +160,7 @@ This project includes a comprehensive test suite using pytest. Tests can be run 
    ```bash
    # Run all tests with coverage
    pytest tests/ --cov=. --cov-report=term-missing -v
-   
+
    # Run only smoke tests
    pytest tests/test_smoke.py -v
    ```
@@ -169,10 +169,10 @@ This project includes a comprehensive test suite using pytest. Tests can be run 
    ```bash
    # Check code style
    flake8 . --max-line-length=88
-   
+
    # Check code formatting
    black --check --diff .
-   
+
    # Auto-format code
    black .
    ```

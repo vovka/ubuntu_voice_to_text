@@ -25,11 +25,12 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Copy application files first
-COPY voice_typing.py .
+COPY main.py .
 COPY voice_typing.sh .
 COPY requirements.txt .
 COPY pyproject.toml .
 COPY tests/ tests/
+COPY voice_typing/ voice_typing/
 COPY docker-entrypoint.sh .
 
 # Make shell script and entrypoint executable

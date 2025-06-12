@@ -22,7 +22,7 @@ This document provides instructions for running the Ubuntu Voice to Text applica
    ```bash
    # Default (Alpine-based, smaller image):
    docker-compose up --build
-   
+
    # Alternative (Ubuntu-based):
    docker-compose --profile ubuntu up --build voice-typing-ubuntu
    ```
@@ -127,10 +127,10 @@ The Vosk speech recognition model is automatically managed by the container:
 
 **Model Persistence**: The `./vosk-models` directory persists the model across:
 - Container restarts
-- Container rebuilds  
+- Container rebuilds
 - Host system reboots
 
-**Model Configuration**: To use a different model, modify the `MODEL_PATH` in `voice_typing.py`. The entrypoint will automatically download the new model.
+**Model Configuration**: To use a different model, modify the `MODEL_PATH` in `main.py`. The entrypoint will automatically download the new model.
 
 ### Permissions
 
@@ -145,7 +145,7 @@ The container runs in privileged mode to access audio hardware. For enhanced sec
 ```
 ❌ Failed to download Vosk model after 3 attempts
 ```
-**Solution**: 
+**Solution**:
 1. Check your internet connection
 2. Verify the model URL is accessible
 3. Ensure the `./vosk-models` directory is writable
@@ -194,7 +194,7 @@ The Dockerfile automatically handles this by switching to alternative mirrors.
 
 ### Custom Model
 To use a different Vosk model:
-1. Modify the `MODEL_PATH` in `voice_typing.py` 
+1. Modify the `MODEL_PATH` in `main.py`
 2. Update the Dockerfile to download your preferred model
 3. Rebuild the image
 
