@@ -147,3 +147,206 @@ def test_backward_compatibility():
             
     except ImportError as e:
         pytest.skip(f"Skipping due to missing dependencies: {e}")
+
+
+def test_whisper_recognition_source_interface():
+    """Test that WhisperRecognitionSource implements the interface."""
+    try:
+        from voice_typing.recognition_sources import WhisperRecognitionSource, VoiceRecognitionSource
+        
+        # Test that WhisperRecognitionSource is a subclass of VoiceRecognitionSource
+        assert issubclass(WhisperRecognitionSource, VoiceRecognitionSource)
+        
+        # Test that it can be instantiated
+        whisper_source = WhisperRecognitionSource()
+        assert whisper_source is not None
+        
+        # Test that it has all required methods
+        assert hasattr(whisper_source, 'initialize')
+        assert hasattr(whisper_source, 'process_audio_chunk')
+        assert hasattr(whisper_source, 'get_result')
+        assert hasattr(whisper_source, 'is_available')
+        assert hasattr(whisper_source, 'cleanup')
+        
+    except ImportError as e:
+        pytest.skip(f"Skipping due to missing dependencies: {e}")
+
+
+def test_whisper_recognition_source_initialization():
+    """Test WhisperRecognitionSource initialization behavior."""
+    try:
+        from voice_typing.recognition_sources import WhisperRecognitionSource
+        
+        whisper_source = WhisperRecognitionSource()
+        
+        # Test initialization without API key
+        result = whisper_source.initialize({'model': 'whisper-1'})
+        assert result is False
+        assert not whisper_source.is_available()
+        
+        # Test initialization with API key
+        result = whisper_source.initialize({'api_key': 'test-key'})
+        assert result is True
+        assert whisper_source.is_available()
+        
+        # Test cleanup
+        whisper_source.cleanup()
+        assert not whisper_source.is_available()
+        
+    except ImportError as e:
+        pytest.skip(f"Skipping due to missing dependencies: {e}")
+
+
+def test_whisper_package_exports():
+    """Test that WhisperRecognitionSource is properly exported from the package."""
+    try:
+        import voice_typing
+        
+        # Test that the new class is available
+        assert hasattr(voice_typing, 'WhisperRecognitionSource')
+        
+        # Test that it can be imported
+        from voice_typing import WhisperRecognitionSource
+        assert WhisperRecognitionSource is not None
+        
+    except ImportError as e:
+        pytest.skip(f"Skipping due to missing dependencies: {e}")
+
+
+def test_audio_processor_with_whisper_source():
+    """Test that AudioProcessor works with WhisperRecognitionSource."""
+    try:
+        from voice_typing import AudioProcessor, Config, GlobalState
+        from voice_typing.recognition_sources import WhisperRecognitionSource
+        
+        # Create a mock Whisper recognition source for testing
+        class MockWhisperRecognitionSource(WhisperRecognitionSource):
+            def initialize(self, config):
+                self._is_available = True
+                return True
+            
+            def process_audio_chunk(self, audio_chunk):
+                pass
+            
+            def get_result(self):
+                return {"text": "whisper test result"}
+            
+            def is_available(self):
+                return True
+            
+            def cleanup(self):
+                pass
+        
+        config = Config()
+        state_ref = GlobalState()
+        mock_source = MockWhisperRecognitionSource()
+        
+        # Test that AudioProcessor can be created with WhisperRecognitionSource
+        audio_processor = AudioProcessor(config, state_ref, mock_source)
+        assert audio_processor is not None
+        assert audio_processor.recognition_source is mock_source
+        
+    except ImportError as e:
+        pytest.skip(f"Skipping due to missing dependencies: {e}")
+
+
+def test_config_recognition_source_selection():
+    """Test that Config supports recognition source selection."""
+    try:
+        import os
+        
+        # Save original environment
+        original_env = {}
+        for key in ['RECOGNITION_SOURCE', 'OPENAI_API_KEY', 'WHISPER_MODEL']:
+            original_env[key] = os.environ.get(key)
+        
+        try:
+            # Clear environment first
+            for key in ['RECOGNITION_SOURCE', 'OPENAI_API_KEY', 'WHISPER_MODEL']:
+                if key in os.environ:
+                    del os.environ[key]
+            
+            # Test default configuration
+            from voice_typing import Config
+            config = Config()
+            assert hasattr(config, 'RECOGNITION_SOURCE')
+            assert hasattr(config, 'OPENAI_API_KEY')
+            assert hasattr(config, 'WHISPER_MODEL')
+            
+            # Default should be 'vosk'
+            assert config.RECOGNITION_SOURCE == 'vosk'
+            
+            # Test environment variable support
+            os.environ['RECOGNITION_SOURCE'] = 'whisper'
+            os.environ['OPENAI_API_KEY'] = 'test-key'
+            os.environ['WHISPER_MODEL'] = 'whisper-1'
+            
+            # Create new config instance to pick up environment changes
+            config2 = Config()
+            assert config2.RECOGNITION_SOURCE == 'whisper'
+            assert config2.OPENAI_API_KEY == 'test-key'
+            assert config2.WHISPER_MODEL == 'whisper-1'
+            
+        finally:
+            # Restore original environment
+            for key, value in original_env.items():
+                if value is not None:
+                    os.environ[key] = value
+                elif key in os.environ:
+                    del os.environ[key]
+        
+    except ImportError as e:
+        pytest.skip(f"Skipping due to missing dependencies: {e}")
+
+
+def test_audio_processor_source_selection():
+    """Test that AudioProcessor creates the correct recognition source based on config."""
+    try:
+        import os
+        from voice_typing import AudioProcessor, Config, GlobalState
+        
+        # Save original environment
+        original_env = {}
+        for key in ['RECOGNITION_SOURCE', 'OPENAI_API_KEY']:
+            original_env[key] = os.environ.get(key)
+            
+        try:
+            # Test Vosk source selection (default)
+            if 'RECOGNITION_SOURCE' in os.environ:
+                del os.environ['RECOGNITION_SOURCE']
+            
+            config = Config()
+            state_ref = GlobalState()
+            
+            # This will try to create VoskRecognitionSource and likely fail due to missing model
+            # but we can check the source type before initialization fails
+            try:
+                audio_processor = AudioProcessor(config, state_ref)
+            except SystemExit:
+                # Expected due to missing Vosk model
+                pass
+            
+            # Test Whisper source selection
+            os.environ['RECOGNITION_SOURCE'] = 'whisper'
+            os.environ['OPENAI_API_KEY'] = 'test-key'
+            
+            config2 = Config()
+            try:
+                audio_processor2 = AudioProcessor(config2, state_ref)
+                # Should create WhisperRecognitionSource
+                from voice_typing.recognition_sources import WhisperRecognitionSource
+                assert isinstance(audio_processor2.recognition_source, WhisperRecognitionSource)
+            except SystemExit:
+                # Expected due to initialization failure
+                pass
+            
+        finally:
+            # Restore original environment
+            for key, value in original_env.items():
+                if value is not None:
+                    os.environ[key] = value
+                elif key in os.environ:
+                    del os.environ[key]
+        
+    except ImportError as e:
+        pytest.skip(f"Skipping due to missing dependencies: {e}")

@@ -4,12 +4,14 @@ A simple voice-to-text application for Ubuntu that provides hands-free text inpu
 
 ## Features
 
-- **Voice Recognition**: Uses Vosk for offline speech recognition
+- **Voice Recognition**: Supports multiple speech recognition engines:
+  - **Vosk**: Offline speech recognition (default)
+  - **OpenAI Whisper**: Cloud-based speech recognition via API
 - **Hotkey Activation**: Press and release Ctrl+Shift to toggle voice recording
 - **Auto-Disable**: Automatically stops listening after 5 seconds of silence
 - **System Tray Integration**: Convenient tray icon for status monitoring
 - **Real-time Processing**: Immediate text typing after speech recognition
-- **No Internet Required**: Offline operation after initial setup
+- **Configurable Backend**: Switch between recognition sources via environment variables
 
 ## Quick Start
 
@@ -66,9 +68,43 @@ For detailed Docker setup instructions, see [DOCKER.md](DOCKER.md).
 
 ## Configuration
 
-The application can be configured by modifying `main.py`:
+The application can be configured via environment variables or by modifying `main.py`:
 
-- **Model Path**: Change `MODEL_PATH` to use a different Vosk model
+### Voice Recognition Source
+
+Choose between different speech recognition engines:
+
+```bash
+# Use Vosk (offline, default)
+export RECOGNITION_SOURCE=vosk
+
+# Use OpenAI Whisper (requires API key)
+export RECOGNITION_SOURCE=whisper
+export OPENAI_API_KEY=your_openai_api_key_here
+export WHISPER_MODEL=whisper-1  # Optional, defaults to whisper-1
+```
+
+#### Using with Docker
+
+Set environment variables in your shell or create a `.env` file:
+
+```bash
+# .env file
+RECOGNITION_SOURCE=whisper
+OPENAI_API_KEY=sk-your-api-key-here
+WHISPER_MODEL=whisper-1
+```
+
+Then run:
+```bash
+docker-compose up --build
+```
+
+### Legacy Configuration
+
+You can also configure by modifying `main.py`:
+
+- **Model Path**: Change `MODEL_PATH` to use a different Vosk model (Vosk only)
 - **Sample Rate**: Adjust `SAMPLE_RATE` for audio quality
 - **Hotkey Combo**: Modify `HOTKEY_COMBO` to use different activation keys
 
@@ -96,6 +132,37 @@ To use a different model:
 
 Available models can be found at: https://alphacephei.com/vosk/models
 
+### OpenAI Whisper Configuration
+
+To use OpenAI Whisper ASR instead of Vosk:
+
+1. **Get an OpenAI API key** from [OpenAI Platform](https://platform.openai.com/)
+
+2. **Set environment variables:**
+   ```bash
+   export RECOGNITION_SOURCE=whisper
+   export OPENAI_API_KEY=sk-your-api-key-here
+   export WHISPER_MODEL=whisper-1  # Optional, defaults to whisper-1
+   ```
+
+3. **Run the application** (Docker or manual installation)
+
+#### Whisper vs Vosk Comparison
+
+| Feature | Vosk | OpenAI Whisper |
+|---------|------|----------------|
+| **Internet Required** | No | Yes |
+| **Setup Complexity** | Model download required | API key only |
+| **Accuracy** | Good | Excellent |
+| **Processing Speed** | Real-time | Near real-time |
+| **Privacy** | Complete (offline) | Data sent to OpenAI |
+| **Cost** | Free | Pay per usage |
+| **Language Support** | Limited by model | 90+ languages |
+
+#### Whisper API Costs
+
+OpenAI Whisper API charges $0.006 per minute of audio. A typical voice input session (5-10 seconds) costs less than $0.001.
+
 ## Requirements
 
 ### System Requirements
@@ -108,7 +175,8 @@ Available models can be found at: https://alphacephei.com/vosk/models
 ### Python Dependencies
 
 - `sounddevice` - Audio input/output
-- `vosk` - Speech recognition engine
+- `vosk` - Speech recognition engine (offline)
+- `openai` - OpenAI Whisper API client (cloud-based)
 - `pyaudio` - Audio interface
 - `keyboard` - Hotkey detection
 - `pynput` - Input simulation
