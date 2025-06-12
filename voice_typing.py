@@ -67,7 +67,7 @@ class TrayIconManager:
 class Config:
     MODEL_PATH = os.path.expanduser("/opt/vosk-model-small-en-us-0.15")
     SAMPLE_RATE = 16000
-    HOTKEY_COMBO = {keyboard.Key.ctrl, keyboard.Key.shift}
+    HOTKEY_COMBO = {keyboard.Key.cmd, keyboard.Key.shift}  # Changed to Win+Shift
 
 # --- Hotkey Listener ---
 class HotkeyManager:
@@ -153,20 +153,20 @@ class AudioProcessor:
             self.last_text_at = time.time()
             print(f"[AudioProcessor] 🗣️ {result['text']}")
             self.type_text(result["text"])
-        
+
         # Auto-disable after 5 seconds of inactivity (requirement: inactivity timeout)
         current_time = time.time()
-        
+
         # For 'listening' state: check if 5 seconds passed since last text OR listening start
         if self.state_ref.state == 'listening' and self.listening_started_at is not None:
             time_since_last_activity = current_time - (self.last_text_at if self.last_text_at else self.listening_started_at)
             if time_since_last_activity > 5:
                 print("[AudioProcessor] listening state: auto-disabling after 5 seconds of inactivity")
                 self.state_ref.state = 'idle'
-        
-        # For 'finish_listening' state: existing timeout logic (preserved for manual stop flow)
-        elif self.state_ref.state == 'finish_listening' and self.last_text_at is not None and current_time - self.last_text_at > 5:
-            print("[AudioProcessor] finish_listening state: resetting to idle")
+
+        # For 'finish_listening' state: stop immediately
+        elif self.state_ref.state == 'finish_listening':
+            print("[AudioProcessor] finish_listening state: resetting to idle immediately")
             self.state_ref.state = 'idle'
 
     @staticmethod
