@@ -11,17 +11,20 @@ RUN apt-get update && apt-get install -y \
     alsa-utils \
     portaudio19-dev \
     wget \
+    curl \
     unzip \
     python3-pil \
     gcc \
     build-essential \
     linux-headers-amd64 \
+    ffmpeg \
+    libsndfile1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Create application directory
 WORKDIR /app
 
-# Copy application files
+# Copy application files first
 COPY voice_typing.py .
 COPY voice_typing.sh .
 COPY requirements.txt .
@@ -31,9 +34,6 @@ COPY docker-entrypoint.sh .
 
 # Make shell script and entrypoint executable
 RUN chmod +x voice_typing.sh docker-entrypoint.sh
-
-# Create directory for Vosk model (to be mounted at runtime)
-RUN mkdir -p /opt/vosk-model-small-en-us-0.15
 
 # Create virtual environment and install Python dependencies at build time
 RUN python3 -m venv /app/venv && \

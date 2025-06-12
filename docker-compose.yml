@@ -22,11 +22,10 @@ services:
       - /run/user/1000/pulse:/run/user/1000/pulse:rw
       # Alternative audio device access
       - /dev/snd:/dev/snd:rw
-      # Vosk model directory (download model locally first)
-      # - ./vosk-model:/opt/vosk-model-small-en-us-0.15:ro # this is for CI
-      # - .:/app:rw  # Mount source for development
-      - /opt/vosk-model-small-en-us-0.15:/opt/vosk-model-small-en-us-0.15:ro # this is for development
       - /home/${USER}/.Xauthority:/home/${USER}/.Xauthority:rw
+      # Vosk model persistence directory (now as a named volume). Also need to chown in host OS (since this container runs as non-root user):
+      # `sudo chown -R $(id -u):$(id -g) /var/lib/docker/volumes/ubuntu_voice_to_text_vosk-models/_data`
+      - vosk-models:/models:rw
     devices:
       # Audio devices
       - /dev/snd:/dev/snd
@@ -89,9 +88,8 @@ services:
       - /run/user/1000/pulse:/run/user/1000/pulse:rw
       # Alternative audio device access
       - /dev/snd:/dev/snd:rw
-      # Vosk model directory (download model locally first)
-      - ./vosk-model:/opt/vosk-model-small-en-us-0.15:ro
-    devices:
+      # Vosk model persistence directory
+      - ./vosk-models:/models:rw
       # Audio devices
       - /dev/snd:/dev/snd
     stdin_open: true
@@ -99,3 +97,7 @@ services:
     restart: unless-stopped
     profiles:
       - ubuntu  # Only start when explicitly requested
+
+volumes:
+  vosk-models:
+    driver: local

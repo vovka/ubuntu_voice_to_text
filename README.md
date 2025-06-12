@@ -21,15 +21,12 @@ A simple voice-to-text application for Ubuntu that provides hands-free text inpu
    cd ubuntu_voice_to_text
    ```
 
-2. **Download the speech recognition model:**
-   ```bash
-   ./download-model.sh
-   ```
-
-3. **Run with Docker Compose:**
+2. **Run with Docker Compose:**
    ```bash
    docker-compose up --build
    ```
+
+The Docker container will automatically download and cache the Vosk speech recognition model on first run. The model is persisted in the `./vosk-models` directory, so subsequent runs will be faster.
 
 For detailed Docker setup instructions, see [DOCKER.md](DOCKER.md).
 
@@ -38,10 +35,15 @@ For detailed Docker setup instructions, see [DOCKER.md](DOCKER.md).
 1. **Install system dependencies:**
    ```bash
    sudo apt update
-   sudo apt install python3 python3-pip python3-venv xdotool pulseaudio alsa-utils portaudio19-dev python3-dev build-essential wget unzip
+   sudo apt install python3 python3-pip python3-venv xdotool pulseaudio alsa-utils portaudio19-dev python3-dev build-essential wget unzip ffmpeg libsndfile1
    ```
 
-2. **Run the setup script:**
+2. **Download the Vosk model (required for manual installation):**
+   ```bash
+   ./download-model.sh
+   ```
+
+3. **Run the setup script:**
    ```bash
    ./voice_typing.sh
    ```
@@ -69,6 +71,30 @@ The application can be configured by modifying `voice_typing.py`:
 - **Model Path**: Change `MODEL_PATH` to use a different Vosk model
 - **Sample Rate**: Adjust `SAMPLE_RATE` for audio quality
 - **Hotkey Combo**: Modify `HOTKEY_COMBO` to use different activation keys
+
+### Vosk Model Configuration
+
+The application uses the **vosk-model-small-en-us-0.15** model by default, which provides:
+- **Language**: English (US)
+- **Size**: ~50MB
+- **Quality**: Optimized for size and reasonable accuracy
+
+#### Docker Model Management
+
+When using Docker, the model is automatically managed:
+- **First run**: The model is downloaded automatically and cached in `./vosk-models/`
+- **Subsequent runs**: The cached model is used, making startup faster
+- **Model persistence**: The model persists across container rebuilds and restarts
+- **No host dependency**: No manual setup required on the host system
+
+#### Manual Model Management
+
+To use a different model:
+1. Update the `MODEL_PATH` in `voice_typing.py`
+2. For Docker: The entrypoint will automatically download the new model
+3. For manual installation: Download the model manually and update the path
+
+Available models can be found at: https://alphacephei.com/vosk/models
 
 ## Requirements
 

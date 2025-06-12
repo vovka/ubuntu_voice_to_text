@@ -111,6 +111,7 @@ Thumbs.db
 
 # Vosk model
 vosk-model/
+vosk-models/
 *.zip
 
 # Spyder project settings
