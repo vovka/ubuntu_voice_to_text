@@ -9,6 +9,7 @@ class Config:
     def HOTKEY_COMBO(self):
         try:
             from pynput import keyboard
+
             return {keyboard.Key.cmd, keyboard.Key.shift}  # Win+Shift
         except ImportError:
             # Fallback for testing without dependencies
