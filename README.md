@@ -35,10 +35,15 @@ For detailed Docker setup instructions, see [DOCKER.md](DOCKER.md).
 1. **Install system dependencies:**
    ```bash
    sudo apt update
-   sudo apt install python3 python3-pip python3-venv xdotool pulseaudio alsa-utils portaudio19-dev python3-dev build-essential wget unzip
+   sudo apt install python3 python3-pip python3-venv xdotool pulseaudio alsa-utils portaudio19-dev python3-dev build-essential wget unzip ffmpeg libsndfile1
    ```
 
-2. **Run the setup script:**
+2. **Download the Vosk model (required for manual installation):**
+   ```bash
+   ./download-model.sh
+   ```
+
+3. **Run the setup script:**
    ```bash
    ./voice_typing.sh
    ```
@@ -66,6 +71,20 @@ The application can be configured by modifying `voice_typing.py`:
 - **Model Path**: Change `MODEL_PATH` to use a different Vosk model
 - **Sample Rate**: Adjust `SAMPLE_RATE` for audio quality
 - **Hotkey Combo**: Modify `HOTKEY_COMBO` to use different activation keys
+
+### Vosk Model Configuration
+
+The application uses the **vosk-model-small-en-us-0.15** model by default, which provides:
+- **Language**: English (US)
+- **Size**: ~50MB
+- **Quality**: Optimized for size and reasonable accuracy
+
+To use a different model:
+1. Update the `MODEL_PATH` in `voice_typing.py`
+2. For Docker: Modify the Dockerfile to download your preferred model and rebuild
+3. For manual installation: Download the model manually and update the path
+
+Available models can be found at: https://alphacephei.com/vosk/models
 
 ## Requirements
 
