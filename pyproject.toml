@@ -8,13 +8,13 @@ packages = [{include = "voice_typing"}]
 
 [tool.poetry.dependencies]
 python = "^3.8.1"
-vosk = "*"
-keyboard = "*"
-pynput = "*"
-pystray = "*"
-pillow = "*"
-sounddevice = "*"
-openai = "*"
+vosk = "^0.3.45"
+keyboard = "^0.13.5"
+pynput = "^1.7.6"
+pystray = "^0.24.0"
+pillow = "^9.4.0"
+sounddevice = "^0.4.6"
+openai = "^0.27.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.0.0"

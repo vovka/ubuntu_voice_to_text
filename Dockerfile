@@ -44,7 +44,7 @@ COPY docker-entrypoint.sh .
 RUN chmod +x docker-entrypoint.sh
 
 # Install the package in development mode
-RUN poetry install
+RUN poetry install --no-dev
 
 # Set environment variables for audio and display
 ENV PULSE_RUNTIME_PATH=/run/user/1000/pulse
