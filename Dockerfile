@@ -1,8 +1,5 @@
 FROM python:3.11-slim
 
-# # Update Alpine repositories to fix network issues
-# RUN sed -i 's|https://dl-cdn.alpinelinux.org|http://mirror1.hs-esslingen.de/pub/Mirrors/alpine|' /etc/apk/repositories || true
-
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     python3-dev \
@@ -26,15 +23,13 @@ WORKDIR /app
 
 # Copy application files first
 COPY main.py .
-# COPY voice_typing.sh .
 COPY requirements.txt .
 COPY pyproject.toml .
 COPY tests/ tests/
 COPY voice_typing/ voice_typing/
 COPY docker-entrypoint.sh .
 
-# Make shell script and entrypoint executable
-# RUN chmod +x voice_typing.sh docker-entrypoint.sh
+# Make entrypoint executable
 RUN chmod +x docker-entrypoint.sh
 
 # Create virtual environment and install Python dependencies at build time

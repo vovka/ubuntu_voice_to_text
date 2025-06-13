@@ -56,8 +56,9 @@ For detailed Docker setup instructions, see [DOCKER.md](DOCKER.md).
    ./download-model.sh
    ```
 
-5. **Run the application:**
+5. **Set the model path and run the application:**
    ```bash
+   export VOSK_MODEL_PATH="$(pwd)/vosk-model-small-en-us-0.15"
    python main.py
    ```
 
@@ -125,6 +126,20 @@ The application uses the **vosk-model-small-en-us-0.15** model by default, which
 - **Language**: English (US)
 - **Size**: ~50MB
 - **Quality**: Optimized for size and reasonable accuracy
+
+#### Environment Variables
+
+```bash
+# Vosk model path (for manual installation)
+export VOSK_MODEL_PATH="/path/to/vosk-model-small-en-us-0.15"
+
+# Recognition source selection
+export RECOGNITION_SOURCE=vosk  # or whisper
+
+# OpenAI Whisper configuration
+export OPENAI_API_KEY=sk-your-api-key-here
+export WHISPER_MODEL=whisper-1
+```
 
 #### Docker Model Management
 

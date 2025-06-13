@@ -30,7 +30,7 @@ dependencies = [
     "pystray",
     "pillow",
     "sounddevice",
-    "pyaudio",
+    "openai",
 ]
 
 [project.optional-dependencies]

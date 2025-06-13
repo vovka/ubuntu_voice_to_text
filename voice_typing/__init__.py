@@ -8,7 +8,11 @@ from .audio_processor import AudioProcessor
 from .tray_icon_manager import TrayIconManager
 from .hotkey_manager import HotkeyManager
 from .voice_typing_app import VoiceTyping
-from .recognition_sources import VoiceRecognitionSource, VoskRecognitionSource, WhisperRecognitionSource
+from .recognition_sources import (
+    VoiceRecognitionSource,
+    VoskRecognitionSource,
+    WhisperRecognitionSource,
+)
 
 __all__ = [
     "Config",

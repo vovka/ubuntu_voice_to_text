@@ -2,7 +2,6 @@
 OpenAI Whisper ASR implementation of voice recognition source.
 """
 
-import io
 import os
 import tempfile
 import wave
@@ -42,12 +41,19 @@ class WhisperRecognitionSource(VoiceRecognitionSource):
 
         try:
             import openai
+
             self.client = openai.OpenAI(api_key=self.api_key)
             self._is_available = True
-            print(f"[WhisperRecognitionSource] ✅ OpenAI Whisper initialized with model: {self.model}")
+            print(
+                f"[WhisperRecognitionSource] ✅ OpenAI Whisper initialized "
+                f"with model: {self.model}"
+            )
             return True
         except ImportError:
-            print("[WhisperRecognitionSource] openai package not available, recognition disabled")
+            print(
+                "[WhisperRecognitionSource] openai package not available, "
+                "recognition disabled"
+            )
             return False
         except Exception as e:
             print(f"[WhisperRecognitionSource] Error initializing OpenAI Whisper: {e}")
@@ -78,21 +84,19 @@ class WhisperRecognitionSource(VoiceRecognitionSource):
             # Create a temporary WAV file from the accumulated audio buffer
             with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
                 self._create_wav_file(temp_file.name, bytes(self._audio_buffer))
-                
+
                 # Send audio to OpenAI Whisper API
                 with open(temp_file.name, "rb") as audio_file:
                     transcript = self.client.audio.transcriptions.create(
-                        model=self.model,
-                        file=audio_file,
-                        response_format="json"
+                        model=self.model, file=audio_file, response_format="json"
                     )
-                
+
                 # Clean up temporary file
                 os.unlink(temp_file.name)
-                
+
                 # Clear buffer after processing
                 self._audio_buffer.clear()
-                
+
                 # Store and return result
                 result = {"text": transcript.text.strip()}
                 self._last_result = result if result["text"] else None
@@ -107,12 +111,12 @@ class WhisperRecognitionSource(VoiceRecognitionSource):
     def _create_wav_file(self, filename: str, audio_data: bytes) -> None:
         """
         Create a WAV file from raw audio bytes.
-        
+
         Args:
             filename: Output WAV file path
             audio_data: Raw audio data in bytes
         """
-        with wave.open(filename, 'wb') as wav_file:
+        with wave.open(filename, "wb") as wav_file:
             wav_file.setnchannels(1)  # Mono
             wav_file.setsampwidth(2)  # 16-bit
             wav_file.setframerate(self.sample_rate)
