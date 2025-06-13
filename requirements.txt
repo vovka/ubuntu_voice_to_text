@@ -3,3 +3,6 @@ keyboard
 pynput
 pystray
 pillow
+openai
+sounddevice
+openai
