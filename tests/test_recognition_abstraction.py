@@ -176,6 +176,8 @@ def test_whisper_recognition_source_initialization():
     """Test WhisperRecognitionSource initialization behavior."""
     try:
         from voice_typing.recognition_sources import WhisperRecognitionSource
+        from unittest.mock import patch, MagicMock
+        import sys
         
         whisper_source = WhisperRecognitionSource()
         
@@ -184,10 +186,18 @@ def test_whisper_recognition_source_initialization():
         assert result is False
         assert not whisper_source.is_available()
         
-        # Test initialization with API key
-        result = whisper_source.initialize({'api_key': 'test-key'})
-        assert result is True
-        assert whisper_source.is_available()
+        # Test initialization with API key (mock openai import)
+        mock_openai = MagicMock()
+        mock_client = MagicMock()
+        mock_openai.OpenAI.return_value = mock_client
+        
+        with patch.dict('sys.modules', {'openai': mock_openai}):
+            result = whisper_source.initialize({'api_key': 'test-key'})
+            assert result is True
+            assert whisper_source.is_available()
+            
+            # Verify OpenAI client was created with correct API key
+            mock_openai.OpenAI.assert_called_once_with(api_key='test-key')
         
         # Test cleanup
         whisper_source.cleanup()
