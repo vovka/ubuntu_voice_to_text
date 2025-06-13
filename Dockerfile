@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Install Poetry
-RUN pip install poetry
+RUN pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org poetry
 
 # Copy Poetry configuration files first for better layer caching
 COPY pyproject.toml poetry.lock ./
@@ -30,8 +30,9 @@ COPY pyproject.toml poetry.lock ./
 # Configure Poetry to not create virtual environment (we'll use the system Python)
 RUN poetry config virtualenvs.create false
 
-# Install dependencies
-RUN poetry install --only=main --no-root
+# Install dependencies with increased timeout for network issues
+ENV POETRY_REQUESTS_TIMEOUT=60
+RUN poetry install --only=main --no-root -v
 
 # Copy application files
 COPY main.py .
