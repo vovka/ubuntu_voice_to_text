@@ -40,15 +40,17 @@ For detailed Docker setup instructions, see [DOCKER.md](DOCKER.md).
    sudo apt install python3 python3-pip python3-venv xdotool pulseaudio alsa-utils portaudio19-dev python3-dev build-essential wget unzip ffmpeg libsndfile1
    ```
 
-2. **Create and activate a Python virtual environment:**
+2. **Install Poetry:**
    ```bash
-   python3 -m venv venv
-   source venv/bin/activate
+   curl -sSL https://install.python-poetry.org | python3 -
+   # Add Poetry to PATH
+   echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+   source ~/.bashrc
    ```
 
 3. **Install Python dependencies:**
    ```bash
-   pip install -r requirements.txt
+   poetry install
    ```
 
 4. **Download the Vosk model (required for manual installation):**
@@ -59,7 +61,7 @@ For detailed Docker setup instructions, see [DOCKER.md](DOCKER.md).
 5. **Set the model path and run the application:**
    ```bash
    export VOSK_MODEL_PATH="$(pwd)/vosk-model-small-en-us-0.15"
-   python main.py
+   poetry run python main.py
    ```
 
 ## Usage
@@ -245,30 +247,30 @@ This project includes a comprehensive test suite using pytest. Tests can be run 
 
 #### Local Testing
 
-1. **Install test dependencies:**
+1. **Install dependencies (including dev dependencies):**
    ```bash
-   pip install pytest pytest-cov coverage flake8 black
+   poetry install
    ```
 
 2. **Run tests:**
    ```bash
    # Run all tests with coverage
-   pytest tests/ --cov=. --cov-report=term-missing -v
+   poetry run pytest tests/ --cov=. --cov-report=term-missing -v
 
    # Run only smoke tests
-   pytest tests/test_smoke.py -v
+   poetry run pytest tests/test_smoke.py -v
    ```
 
 3. **Run linting:**
    ```bash
    # Check code style
-   flake8 . --max-line-length=88
+   poetry run flake8 . --max-line-length=88
 
    # Check code formatting
-   black --check --diff .
+   poetry run black --check --diff .
 
    # Auto-format code
-   black .
+   poetry run black .
    ```
 
 #### Docker Testing
@@ -308,10 +310,30 @@ The project includes GitHub Actions workflow that automatically:
 
 Contributions are welcome! Please feel free to submit issues, feature requests, or pull requests.
 
-Before submitting a pull request:
-1. Run the test suite: `pytest tests/`
-2. Check code style: `flake8 . --max-line-length=88`
-3. Format code: `black .`
+### Development Setup
+
+1. **Install Poetry:**
+   ```bash
+   curl -sSL https://install.python-poetry.org | python3 -
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   poetry install
+   ```
+
+3. **Before submitting a pull request:**
+   ```bash
+   # Run the test suite
+   poetry run pytest tests/
+
+   # Check code style
+   poetry run flake8 . --max-line-length=88
+
+   # Format code
+   poetry run black .
+   ```
+
 4. Ensure all CI checks pass
 
 ## License

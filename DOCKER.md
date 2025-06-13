@@ -182,7 +182,7 @@ To use a different Vosk model:
 3. Rebuild the image
 
 ### Dependencies
-Python dependencies are managed via `requirements.txt` and installed at build time for reliability.
+Python dependencies are managed via Poetry and `pyproject.toml`, and installed at build time for reliability. The `poetry.lock` file ensures reproducible builds across environments.
 
 ### Choosing Base Image
 - Use **Alpine** (default) for smaller images and production deployments
