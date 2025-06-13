@@ -52,5 +52,5 @@ class VoiceTyping:
                     # Only process and return text when state becomes idle (see above)
         except ImportError:
             print(
-                "[VoiceTyping] sounddevice not available, audio functionality disabled"
+                "[VoiceTyping] ❌ sounddevice not available, audio functionality disabled"
             )

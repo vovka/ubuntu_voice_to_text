@@ -1,31 +1,32 @@
 #!/bin/bash
+set -euo pipefail
 
 # Activate virtual environment
 source /app/venv/bin/activate
 
 # Fix permissions for /models if running as root and UID/GID are set
-if [ "$(id -u)" = "0" ] && [ -n "$UID" ] && [ -n "$GID" ]; then
+if [ "$(id -u)" = "0" ] && [ -n "${UID:-}" ] && [ -n "${GID:-}" ]; then
     echo "Fixing ownership of /models to $UID:$GID ..."
-    chown -R $UID:$GID /models 2>/dev/null || true
+    chown -R "$UID:$GID" /models 2>/dev/null || true
 fi
 
 # Check if we are in test mode
-if [ "$1" = "test" ]; then
+if [ "${1:-}" = "test" ]; then
     echo "🧪 Running tests..."
     shift  # Remove "test" from arguments
     exec pytest tests/ --cov=. --cov-report=term-missing -v "$@"
-elif [ "$1" = "lint" ]; then
+elif [ "${1:-}" = "lint" ]; then
     echo "🔍 Running linting..."
     echo "Running flake8..."
     flake8 . --max-line-length=88
     echo "Checking code formatting with black..."
     black --check --diff .
     echo "✅ All linting checks passed!"
-elif [ "$1" = "format" ]; then
+elif [ "${1:-}" = "format" ]; then
     echo "🎨 Formatting code with black..."
     black .
     echo "✅ Code formatted!"
-elif [ "$1" = "shell" ]; then
+elif [ "${1:-}" = "shell" ]; then
     echo "🐚 Starting interactive shell..."
     exec /bin/bash
 else
@@ -38,7 +39,7 @@ else
     mkdir -p /models
 
     # Check if Vosk model exists and is complete
-    if [ ! -d "$MODEL_DIR" ] || [ ! "$(ls -A $MODEL_DIR 2>/dev/null)" ] || [ ! -f "$MODEL_DIR/conf/model.conf" ]; then
+    if [ ! -d "$MODEL_DIR" ] || [ ! "$(ls -A "$MODEL_DIR" 2>/dev/null)" ] || [ ! -f "$MODEL_DIR/conf/model.conf" ]; then
         echo "🔄 Vosk model not found or incomplete, downloading..."
         echo "📥 Downloading from: $MODEL_URL"
 
@@ -106,5 +107,5 @@ else
 
     # Run the application
     export PYTHONPATH=/app
-    python3 /app/main.py
+    exec python3 /app/main.py "$@"
 fi

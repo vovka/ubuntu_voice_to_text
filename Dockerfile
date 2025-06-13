@@ -26,7 +26,7 @@ WORKDIR /app
 
 # Copy application files first
 COPY main.py .
-COPY voice_typing.sh .
+# COPY voice_typing.sh .
 COPY requirements.txt .
 COPY pyproject.toml .
 COPY tests/ tests/
@@ -34,15 +34,13 @@ COPY voice_typing/ voice_typing/
 COPY docker-entrypoint.sh .
 
 # Make shell script and entrypoint executable
-RUN chmod +x voice_typing.sh docker-entrypoint.sh
+# RUN chmod +x voice_typing.sh docker-entrypoint.sh
+RUN chmod +x docker-entrypoint.sh
 
 # Create virtual environment and install Python dependencies at build time
 RUN python3 -m venv /app/venv && \
     /app/venv/bin/pip install --upgrade pip --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org && \
-    /app/venv/bin/pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org \
-        sounddevice vosk pyaudio keyboard pynput pystray pillow && \
-    /app/venv/bin/pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org \
-        pytest pytest-cov coverage flake8 black
+    /app/venv/bin/pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org -r requirements.txt
 
 # Set environment variables for audio and display
 ENV PULSE_RUNTIME_PATH=/run/user/1000/pulse

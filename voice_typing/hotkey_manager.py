@@ -56,4 +56,4 @@ class HotkeyManager:
             ) as listener:
                 listener.join()
         except ImportError:
-            print("[HotkeyManager] pynput not available, hotkey functionality disabled")
+            print("[HotkeyManager] ❌ pynput not available, hotkey functionality disabled")

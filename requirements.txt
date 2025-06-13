@@ -4,3 +4,4 @@ pynput
 pystray
 pillow
 openai
+sounddevice
