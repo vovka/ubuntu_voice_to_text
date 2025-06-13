@@ -21,7 +21,7 @@ if [ ! "$(ls -A $MODEL_DIR 2>/dev/null)" ]; then
     wget -O "$MODEL_ZIP" "$MODEL_URL"
     
     echo "Extracting model..."
-    unzip "$MODEL_ZIP"
+    unzip "$MODEL_ZIP" -d "$MODEL_DIR"
     
     # Clean up
     rm -f "$MODEL_ZIP"
