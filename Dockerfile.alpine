@@ -26,11 +26,7 @@ WORKDIR /app
 
 # Copy application files
 COPY main.py .
-COPY voice_typing.sh .
 COPY requirements.txt .
-
-# Make shell script executable
-RUN chmod +x voice_typing.sh
 
 # Create directory for Vosk model (to be mounted at runtime)
 RUN mkdir -p /opt/vosk-model-small-en-us-0.15
