@@ -20,11 +20,7 @@ This document provides instructions for running the Ubuntu Voice to Text applica
 
 2. **Build and run the application:**
    ```bash
-   # Default (Alpine-based, smaller image):
    docker-compose up --build
-
-   # Alternative (Ubuntu-based):
-   docker-compose --profile ubuntu up --build voice-typing-ubuntu
    ```
 
    The Vosk speech recognition model is automatically downloaded and cached on first run.
@@ -35,21 +31,12 @@ This document provides instructions for running the Ubuntu Voice to Text applica
    - Speak while holding the keys
    - Release to process and type the recognized text
 
-## Docker Image Options
+## Docker Image
 
-This project provides two Docker image variants:
-
-### Alpine-based (Default)
-- **Dockerfile**: `Dockerfile` (default)
-- **Image size**: ~150MB (model downloaded separately)
-- **Use case**: Production deployments where size matters
+This project provides a Docker image built on Python 3.11 (Debian-based) that includes:
+- **Size**: ~200MB (model downloaded separately)
+- **Use case**: Production deployments and development
 - **Build**: `docker-compose up --build`
-
-### Ubuntu-based
-- **Dockerfile**: `Dockerfile.ubuntu`
-- **Image size**: ~300MB (model downloaded separately)
-- **Use case**: Development or when compatibility is preferred
-- **Build**: `docker-compose --profile ubuntu up --build voice-typing-ubuntu`
 
 ## CI/CD Integration
 
@@ -74,11 +61,7 @@ docker-compose up --build
 ### Building the Image
 
 ```bash
-# Alpine version (default)
 docker build -t ubuntu-voice-to-text .
-
-# Ubuntu version
-docker build -f Dockerfile.ubuntu -t ubuntu-voice-to-text-ubuntu .
 ```
 
 ### Running the Container
@@ -165,7 +148,7 @@ If you see permission errors related to the model directory:
 
 ### Python Dependencies Installation Issues
 Dependencies are now installed at build time for better reliability.
-- If build fails, try using the Ubuntu-based image: `Dockerfile.ubuntu`
+- If build fails, check your system package dependencies
 - For Alpine issues, the repositories are automatically updated to use alternative mirrors
 
 ### No Audio Input

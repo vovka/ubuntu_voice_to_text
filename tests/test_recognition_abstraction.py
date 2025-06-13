@@ -17,11 +17,14 @@ def test_voice_recognition_source_interface():
         from voice_typing.recognition_sources import VoiceRecognitionSource
 
         # Test that it's an abstract base class
-        assert hasattr(VoiceRecognitionSource, '__abstractmethods__')
+        assert hasattr(VoiceRecognitionSource, "__abstractmethods__")
         abstract_methods = VoiceRecognitionSource.__abstractmethods__
         expected_methods = {
-            'initialize', 'process_audio_chunk', 'get_result',
-            'is_available', 'cleanup'
+            "initialize",
+            "process_audio_chunk",
+            "get_result",
+            "is_available",
+            "cleanup",
         }
         assert abstract_methods == expected_methods
 
@@ -32,7 +35,10 @@ def test_voice_recognition_source_interface():
 def test_vosk_recognition_source_implementation():
     """Test that VoskRecognitionSource implements the interface."""
     try:
-        from voice_typing.recognition_sources import VoskRecognitionSource, VoiceRecognitionSource
+        from voice_typing.recognition_sources import (
+            VoskRecognitionSource,
+            VoiceRecognitionSource,
+        )
 
         # Test that VoskRecognitionSource is a subclass of VoiceRecognitionSource
         assert issubclass(VoskRecognitionSource, VoiceRecognitionSource)
@@ -42,11 +48,11 @@ def test_vosk_recognition_source_implementation():
         assert vosk_source is not None
 
         # Test that it has the required methods
-        assert hasattr(vosk_source, 'initialize')
-        assert hasattr(vosk_source, 'process_audio_chunk')
-        assert hasattr(vosk_source, 'get_result')
-        assert hasattr(vosk_source, 'is_available')
-        assert hasattr(vosk_source, 'cleanup')
+        assert hasattr(vosk_source, "initialize")
+        assert hasattr(vosk_source, "process_audio_chunk")
+        assert hasattr(vosk_source, "get_result")
+        assert hasattr(vosk_source, "is_available")
+        assert hasattr(vosk_source, "cleanup")
 
     except ImportError as e:
         pytest.skip(f"Skipping due to missing dependencies: {e}")
@@ -60,12 +66,12 @@ def test_vosk_recognition_source_initialization():
         vosk_source = VoskRecognitionSource()
 
         # Test initialization with invalid config
-        result = vosk_source.initialize({'model_path': '/non/existent/path'})
+        result = vosk_source.initialize({"model_path": "/non/existent/path"})
         assert result is False
         assert not vosk_source.is_available()
 
         # Test initialization with missing model_path
-        result = vosk_source.initialize({'sample_rate': 16000})
+        result = vosk_source.initialize({"sample_rate": 16000})
         assert result is False
         assert not vosk_source.is_available()
 
@@ -116,11 +122,12 @@ def test_package_exports():
         import voice_typing
 
         # Test that the new classes are available
-        assert hasattr(voice_typing, 'VoiceRecognitionSource')
-        assert hasattr(voice_typing, 'VoskRecognitionSource')
+        assert hasattr(voice_typing, "VoiceRecognitionSource")
+        assert hasattr(voice_typing, "VoskRecognitionSource")
 
         # Test that they can be imported
         from voice_typing import VoiceRecognitionSource, VoskRecognitionSource
+
         assert VoiceRecognitionSource is not None
         assert VoskRecognitionSource is not None
 
@@ -139,7 +146,7 @@ def test_backward_compatibility():
         # Test that AudioProcessor can still be created without recognition source
         # (should default to VoskRecognitionSource)
         try:
-            audio_processor = AudioProcessor(config, state_ref)
+            AudioProcessor(config, state_ref)
             # This might fail due to missing Vosk model, but that's expected
         except SystemExit:
             # SystemExit is expected when model is not found
@@ -152,7 +159,10 @@ def test_backward_compatibility():
 def test_whisper_recognition_source_interface():
     """Test that WhisperRecognitionSource implements the interface."""
     try:
-        from voice_typing.recognition_sources import WhisperRecognitionSource, VoiceRecognitionSource
+        from voice_typing.recognition_sources import (
+            WhisperRecognitionSource,
+            VoiceRecognitionSource,
+        )
 
         # Test that WhisperRecognitionSource is a subclass of VoiceRecognitionSource
         assert issubclass(WhisperRecognitionSource, VoiceRecognitionSource)
@@ -162,11 +172,11 @@ def test_whisper_recognition_source_interface():
         assert whisper_source is not None
 
         # Test that it has all required methods
-        assert hasattr(whisper_source, 'initialize')
-        assert hasattr(whisper_source, 'process_audio_chunk')
-        assert hasattr(whisper_source, 'get_result')
-        assert hasattr(whisper_source, 'is_available')
-        assert hasattr(whisper_source, 'cleanup')
+        assert hasattr(whisper_source, "initialize")
+        assert hasattr(whisper_source, "process_audio_chunk")
+        assert hasattr(whisper_source, "get_result")
+        assert hasattr(whisper_source, "is_available")
+        assert hasattr(whisper_source, "cleanup")
 
     except ImportError as e:
         pytest.skip(f"Skipping due to missing dependencies: {e}")
@@ -177,12 +187,11 @@ def test_whisper_recognition_source_initialization():
     try:
         from voice_typing.recognition_sources import WhisperRecognitionSource
         from unittest.mock import patch, MagicMock
-        import sys
 
         whisper_source = WhisperRecognitionSource()
 
         # Test initialization without API key
-        result = whisper_source.initialize({'model': 'whisper-1'})
+        result = whisper_source.initialize({"model": "whisper-1"})
         assert result is False
         assert not whisper_source.is_available()
 
@@ -191,13 +200,13 @@ def test_whisper_recognition_source_initialization():
         mock_client = MagicMock()
         mock_openai.OpenAI.return_value = mock_client
 
-        with patch.dict('sys.modules', {'openai': mock_openai}):
-            result = whisper_source.initialize({'api_key': 'test-key'})
+        with patch.dict("sys.modules", {"openai": mock_openai}):
+            result = whisper_source.initialize({"api_key": "test-key"})
             assert result is True
             assert whisper_source.is_available()
 
             # Verify OpenAI client was created with correct API key
-            mock_openai.OpenAI.assert_called_once_with(api_key='test-key')
+            mock_openai.OpenAI.assert_called_once_with(api_key="test-key")
 
         # Test cleanup
         whisper_source.cleanup()
@@ -213,10 +222,11 @@ def test_whisper_package_exports():
         import voice_typing
 
         # Test that the new class is available
-        assert hasattr(voice_typing, 'WhisperRecognitionSource')
+        assert hasattr(voice_typing, "WhisperRecognitionSource")
 
         # Test that it can be imported
         from voice_typing import WhisperRecognitionSource
+
         assert WhisperRecognitionSource is not None
 
     except ImportError as e:
@@ -267,35 +277,36 @@ def test_config_recognition_source_selection():
 
         # Save original environment
         original_env = {}
-        for key in ['RECOGNITION_SOURCE', 'OPENAI_API_KEY', 'WHISPER_MODEL']:
+        for key in ["RECOGNITION_SOURCE", "OPENAI_API_KEY", "WHISPER_MODEL"]:
             original_env[key] = os.environ.get(key)
 
         try:
             # Clear environment first
-            for key in ['RECOGNITION_SOURCE', 'OPENAI_API_KEY', 'WHISPER_MODEL']:
+            for key in ["RECOGNITION_SOURCE", "OPENAI_API_KEY", "WHISPER_MODEL"]:
                 if key in os.environ:
                     del os.environ[key]
 
             # Test default configuration
             from voice_typing import Config
+
             config = Config()
-            assert hasattr(config, 'RECOGNITION_SOURCE')
-            assert hasattr(config, 'OPENAI_API_KEY')
-            assert hasattr(config, 'WHISPER_MODEL')
+            assert hasattr(config, "RECOGNITION_SOURCE")
+            assert hasattr(config, "OPENAI_API_KEY")
+            assert hasattr(config, "WHISPER_MODEL")
 
             # Default should be 'vosk'
-            assert config.RECOGNITION_SOURCE == 'vosk'
+            assert config.RECOGNITION_SOURCE == "vosk"
 
             # Test environment variable support
-            os.environ['RECOGNITION_SOURCE'] = 'whisper'
-            os.environ['OPENAI_API_KEY'] = 'test-key'
-            os.environ['WHISPER_MODEL'] = 'whisper-1'
+            os.environ["RECOGNITION_SOURCE"] = "whisper"
+            os.environ["OPENAI_API_KEY"] = "test-key"
+            os.environ["WHISPER_MODEL"] = "whisper-1"
 
             # Create new config instance to pick up environment changes
             config2 = Config()
-            assert config2.RECOGNITION_SOURCE == 'whisper'
-            assert config2.OPENAI_API_KEY == 'test-key'
-            assert config2.WHISPER_MODEL == 'whisper-1'
+            assert config2.RECOGNITION_SOURCE == "whisper"
+            assert config2.OPENAI_API_KEY == "test-key"
+            assert config2.WHISPER_MODEL == "whisper-1"
 
         finally:
             # Restore original environment
@@ -310,42 +321,45 @@ def test_config_recognition_source_selection():
 
 
 def test_audio_processor_source_selection():
-    """Test that AudioProcessor creates the correct recognition source based on config."""
+    """Test that AudioProcessor creates correct recognition source based on config."""
     try:
         import os
         from voice_typing import AudioProcessor, Config, GlobalState
 
         # Save original environment
         original_env = {}
-        for key in ['RECOGNITION_SOURCE', 'OPENAI_API_KEY']:
+        for key in ["RECOGNITION_SOURCE", "OPENAI_API_KEY"]:
             original_env[key] = os.environ.get(key)
 
         try:
             # Test Vosk source selection (default)
-            if 'RECOGNITION_SOURCE' in os.environ:
-                del os.environ['RECOGNITION_SOURCE']
+            if "RECOGNITION_SOURCE" in os.environ:
+                del os.environ["RECOGNITION_SOURCE"]
 
             config = Config()
             state_ref = GlobalState()
 
-            # This will try to create VoskRecognitionSource and likely fail due to missing model
-            # but we can check the source type before initialization fails
+            # This will try to create VoskRecognitionSource and likely fail
+            # due to missing model but we can check before initialization fails
             try:
-                audio_processor = AudioProcessor(config, state_ref)
+                AudioProcessor(config, state_ref)
             except SystemExit:
                 # Expected due to missing Vosk model
                 pass
 
             # Test Whisper source selection
-            os.environ['RECOGNITION_SOURCE'] = 'whisper'
-            os.environ['OPENAI_API_KEY'] = 'test-key'
+            os.environ["RECOGNITION_SOURCE"] = "whisper"
+            os.environ["OPENAI_API_KEY"] = "test-key"
 
             config2 = Config()
             try:
                 audio_processor2 = AudioProcessor(config2, state_ref)
                 # Should create WhisperRecognitionSource
                 from voice_typing.recognition_sources import WhisperRecognitionSource
-                assert isinstance(audio_processor2.recognition_source, WhisperRecognitionSource)
+
+                assert isinstance(
+                    audio_processor2.recognition_source, WhisperRecognitionSource
+                )
             except SystemExit:
                 # Expected due to initialization failure
                 pass

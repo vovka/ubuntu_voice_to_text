@@ -4,8 +4,7 @@ services:
   voice-typing:
     build:
       context: .
-      dockerfile: Dockerfile  # Default: Alpine (smaller image)
-      # Alternative: Use Dockerfile.ubuntu for Ubuntu base
+      dockerfile: Dockerfile
     container_name: ubuntu-voice-to-text
     network_mode: host
     # privileged: true # looks like it is working without this
@@ -72,39 +71,6 @@ services:
       - .:/app/src:rw  # Mount source for writing formatted files
     profiles:
       - test
-
-  # Alternative Ubuntu-based service
-  voice-typing-ubuntu:
-    build:
-      context: .
-      dockerfile: Dockerfile.ubuntu
-    container_name: ubuntu-voice-to-text-ubuntu
-    network_mode: host
-    privileged: true
-    environment:
-      - DISPLAY=${DISPLAY}
-      - PULSE_RUNTIME_PATH=/run/user/1000/pulse
-      - XDG_RUNTIME_DIR=/run/user/1000
-      # Voice recognition configuration
-      - RECOGNITION_SOURCE=${RECOGNITION_SOURCE:-vosk}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - WHISPER_MODEL=${WHISPER_MODEL:-whisper-1}
-    volumes:
-      # X11 socket for GUI access
-      - /tmp/.X11-unix:/tmp/.X11-unix:rw
-      # PulseAudio socket for audio access
-      - /run/user/1000/pulse:/run/user/1000/pulse:rw
-      # Alternative audio device access
-      - /dev/snd:/dev/snd:rw
-      # Vosk model persistence directory
-      - ./vosk-models:/models:rw
-      # Audio devices
-      - /dev/snd:/dev/snd
-    stdin_open: true
-    tty: true
-    restart: unless-stopped
-    profiles:
-      - ubuntu  # Only start when explicitly requested
 
 volumes:
   vosk-models:

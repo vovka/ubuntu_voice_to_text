@@ -6,7 +6,7 @@ from voice_typing import (
     AudioProcessor,
     TrayIconManager,
     HotkeyManager,
-    VoiceTyping
+    VoiceTyping,
 )
 
 # --- Main ---
@@ -15,7 +15,9 @@ if __name__ == "__main__":
     state_ref = GlobalState()
     audio_processor = AudioProcessor(config, state_ref)
     tray_icon_manager = TrayIconManager(state_ref)
-    hotkey_manager = HotkeyManager(config, state_ref, tray_icon_manager, audio_processor)
+    hotkey_manager = HotkeyManager(
+        config, state_ref, tray_icon_manager, audio_processor
+    )
     voice_typing = VoiceTyping(config, state_ref, audio_processor, tray_icon_manager)
 
     # print("[trace] Starting tray and hotkey threads")

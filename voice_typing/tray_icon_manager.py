@@ -66,5 +66,6 @@ class TrayIconManager:
             self.icon.run()
         except ImportError:
             print(
-                "[TrayIconManager] pystray not available, tray icon functionality disabled"
+                "[TrayIconManager] pystray not available, "
+                "tray icon functionality disabled"
             )

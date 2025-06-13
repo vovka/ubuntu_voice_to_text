@@ -19,7 +19,8 @@ class VoiceTyping:
     def audio_callback(self, indata, frames, time, status):
         if self.state_ref.state in ("listening", "finish_listening"):
             print(
-                f"[VoiceTyping] Audio callback: putting audio data in queue (state={self.state_ref.state})"
+                f"[VoiceTyping] Audio callback: putting audio data in queue "
+                f"(state={self.state_ref.state})"
             )
             self.state_ref.q.put(bytes(indata))
 
@@ -37,7 +38,8 @@ class VoiceTyping:
                 callback=self.audio_callback,
             ):
                 print(
-                    "[VoiceTyping] 🎤 Voice typing ready. Press and release Ctrl+Shift to start listening."
+                    "[VoiceTyping] 🎤 Voice typing ready. Press and release "
+                    "Ctrl+Shift to start listening."
                 )
                 while True:
                     if self.state_ref.state == "idle":
@@ -52,5 +54,6 @@ class VoiceTyping:
                     # Only process and return text when state becomes idle (see above)
         except ImportError:
             print(
-                "[VoiceTyping] ❌ sounddevice not available, audio functionality disabled"
+                "[VoiceTyping] ❌ sounddevice not available, "
+                "audio functionality disabled"
             )

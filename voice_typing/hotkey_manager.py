@@ -26,7 +26,8 @@ class HotkeyManager:
             print("[HotkeyManager] HOTKEY_COMBO released while listening")
             self._combo_pressed = False  # Reset the flag to prevent starting again
             self.set_state("finish_listening")
-        # If not listening and combo was pressed and all keys are now released, start listening
+        # If not listening and combo was pressed and all keys released,
+        # start listening
         elif (
             self.state_ref.state != "listening"
             and self._combo_pressed
@@ -56,4 +57,6 @@ class HotkeyManager:
             ) as listener:
                 listener.join()
         except ImportError:
-            print("[HotkeyManager] ❌ pynput not available, hotkey functionality disabled")
+            print(
+                "[HotkeyManager] ❌ pynput not available, hotkey functionality disabled"
+            )

@@ -3,7 +3,11 @@ from typing import Optional
 
 from .config import Config
 from .global_state import GlobalState
-from .recognition_sources import VoiceRecognitionSource, VoskRecognitionSource, WhisperRecognitionSource
+from .recognition_sources import (
+    VoiceRecognitionSource,
+    VoskRecognitionSource,
+    WhisperRecognitionSource,
+)
 
 
 class AudioProcessor:
@@ -34,13 +38,16 @@ class AudioProcessor:
     def _create_recognition_source(self, config: Config) -> VoiceRecognitionSource:
         """Create recognition source based on configuration."""
         source_type = config.RECOGNITION_SOURCE.lower()
-        
+
         if source_type == "whisper":
             return WhisperRecognitionSource()
         elif source_type == "vosk":
             return VoskRecognitionSource()
         else:
-            print(f"[AudioProcessor] ⚠️ Unknown recognition source '{source_type}', defaulting to Vosk")
+            print(
+                f"[AudioProcessor] ⚠️ Unknown recognition source '{source_type}', "
+                "defaulting to Vosk"
+            )
             return VoskRecognitionSource()
 
     def _get_recognition_config(self, config: Config) -> dict:
@@ -48,18 +55,22 @@ class AudioProcessor:
         base_config = {
             "sample_rate": config.SAMPLE_RATE,
         }
-        
+
         if config.RECOGNITION_SOURCE.lower() == "whisper":
-            base_config.update({
-                "api_key": config.OPENAI_API_KEY,
-                "model": config.WHISPER_MODEL,
-            })
+            base_config.update(
+                {
+                    "api_key": config.OPENAI_API_KEY,
+                    "model": config.WHISPER_MODEL,
+                }
+            )
         else:
             # Vosk configuration
-            base_config.update({
-                "model_path": config.MODEL_PATH,
-            })
-        
+            base_config.update(
+                {
+                    "model_path": config.MODEL_PATH,
+                }
+            )
+
         return base_config
 
     def start_listening(self):
