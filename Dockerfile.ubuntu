@@ -34,7 +34,7 @@ RUN mkdir -p /opt/vosk-model-small-en-us-0.15
 RUN python3 -m venv /app/venv && \
     /app/venv/bin/pip install --upgrade pip --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org && \
     /app/venv/bin/pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org \
-        sounddevice vosk pyaudio keyboard pynput pystray pillow
+        sounddevice vosk keyboard pynput pystray pillow
 
 # Set environment variables for audio and display
 ENV PULSE_RUNTIME_PATH=/run/user/1000/pulse

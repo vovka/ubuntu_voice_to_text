@@ -188,7 +188,7 @@ OpenAI Whisper API charges $0.006 per minute of audio. A typical voice input ses
 - `sounddevice` - Audio input/output
 - `vosk` - Speech recognition engine (offline)
 - `openai` - OpenAI Whisper API client (cloud-based)
-- `pyaudio` - Audio interface
+- `sounddevice` - Audio input/output
 - `keyboard` - Hotkey detection
 - `pynput` - Input simulation
 - `pystray` - System tray icon
