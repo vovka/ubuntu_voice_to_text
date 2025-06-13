@@ -2,7 +2,7 @@
 name = "ubuntu-voice-to-text"
 version = "1.0.0"
 description = "A voice-to-text application for Ubuntu using speech recognition"
-authors = ["vovka <vovka@example.com>"]
+authors = ["Volodymyr Shcherbyna <voodymyr@shcherbyna.me>"]
 readme = "README.md"
 packages = [{include = "voice_typing"}]
 
