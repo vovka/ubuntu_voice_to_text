@@ -40,14 +40,25 @@ For detailed Docker setup instructions, see [DOCKER.md](DOCKER.md).
    sudo apt install python3 python3-pip python3-venv xdotool pulseaudio alsa-utils portaudio19-dev python3-dev build-essential wget unzip ffmpeg libsndfile1
    ```
 
-2. **Download the Vosk model (required for manual installation):**
+2. **Create and activate a Python virtual environment:**
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+
+3. **Install Python dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Download the Vosk model (required for manual installation):**
    ```bash
    ./download-model.sh
    ```
 
-3. **Run the setup script:**
+5. **Run the application:**
    ```bash
-   ./voice_typing.sh
+   python main.py
    ```
 
 ## Usage
@@ -177,7 +188,7 @@ OpenAI Whisper API charges $0.006 per minute of audio. A typical voice input ses
 - `sounddevice` - Audio input/output
 - `vosk` - Speech recognition engine (offline)
 - `openai` - OpenAI Whisper API client (cloud-based)
-- `pyaudio` - Audio interface
+- `sounddevice` - Audio input/output
 - `keyboard` - Hotkey detection
 - `pynput` - Input simulation
 - `pystray` - System tray icon
