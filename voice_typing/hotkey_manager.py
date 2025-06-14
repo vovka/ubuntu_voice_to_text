@@ -1,14 +1,16 @@
 from .config import Config
+from .interfaces.state_manager import StateManager, VoiceTypingState
 
 
 class HotkeyManager:
     def __init__(
-        self, config: Config, state_ref, tray_icon_manager, audio_processor=None
+        self, config: Config, state_ref, tray_icon_manager, audio_processor=None, state_manager: StateManager = None
     ):
         self.config = config
         self.state_ref = state_ref
         self.tray_icon_manager = tray_icon_manager
         self.audio_processor = audio_processor
+        self.state_manager = state_manager
         self._combo_pressed = False  # Track if combo was pressed
 
     def on_press(self, key):
@@ -39,13 +41,40 @@ class HotkeyManager:
 
     def set_state(self, new_state):
         print(f"[HotkeyManager] set_state({new_state}) called")
-        if self.state_ref.state != new_state:
-            self.state_ref.state = new_state
-            print(f"[HotkeyManager] Voice typing state: {self.state_ref.state}")
-            # Reset listening timer when starting to listen (requirement: timer reset)
-            if new_state == "listening" and self.audio_processor:
-                self.audio_processor.start_listening()
-            self.tray_icon_manager.update_icon()
+        
+        # Use StateManager if available, otherwise fall back to direct mutation
+        if self.state_manager is not None:
+            try:
+                # Convert string to VoiceTypingState enum
+                if isinstance(new_state, str):
+                    new_state_enum = VoiceTypingState(new_state)
+                else:
+                    new_state_enum = new_state
+                
+                # Use StateManager for controlled state transitions
+                success = self.state_manager.set_state(new_state_enum, 
+                                                     metadata={'source': 'hotkey_manager'})
+                if success:
+                    print(f"[HotkeyManager] Voice typing state: {new_state_enum.value}")
+                    # Reset listening timer when starting to listen (requirement: timer reset)
+                    if new_state_enum == VoiceTypingState.LISTENING and self.audio_processor:
+                        self.audio_processor.start_listening()
+                    if self.tray_icon_manager:
+                        self.tray_icon_manager.update_icon()
+                else:
+                    print(f"[HotkeyManager] Failed to transition to state: {new_state_enum}")
+            except ValueError as e:
+                print(f"[HotkeyManager] Invalid state: {new_state}, error: {e}")
+        else:
+            # Fallback to direct state mutation for backward compatibility
+            if self.state_ref.state != new_state:
+                self.state_ref.state = new_state
+                print(f"[HotkeyManager] Voice typing state: {self.state_ref.state}")
+                # Reset listening timer when starting to listen (requirement: timer reset)
+                if new_state == "listening" and self.audio_processor:
+                    self.audio_processor.start_listening()
+                if self.tray_icon_manager:
+                    self.tray_icon_manager.update_icon()
 
     def hotkey_thread(self):
         print("[HotkeyManager] Starting hotkey listener thread")

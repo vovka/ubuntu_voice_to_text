@@ -116,6 +116,7 @@ class AudioProcessor:
                     "[AudioProcessor] listening state: auto-disabling after "
                     "5 seconds of inactivity"
                 )
+                print("[StateManager] State transition: listening → idle (AudioProcessor auto-timeout)")
                 self.state_ref.state = "idle"
 
         # For 'finish_listening' state: existing timeout logic (manual stop flow)
@@ -125,6 +126,7 @@ class AudioProcessor:
             and current_time - self.last_text_at > 5
         ):
             print("[AudioProcessor] finish_listening state: resetting to idle")
+            print("[StateManager] State transition: finish_listening → idle (AudioProcessor timeout)")
             self.state_ref.state = "idle"
 
     @staticmethod
