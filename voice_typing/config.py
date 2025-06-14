@@ -6,8 +6,7 @@ class Config:
     def MODEL_PATH(self):
         """Get model path from environment variable or use default."""
         return os.getenv(
-            "VOSK_MODEL_PATH",
-            os.path.expanduser("/models/vosk-model-small-en-us-0.15")
+            "VOSK_MODEL_PATH", os.path.expanduser("/models/vosk-model-small-en-us-0.15")
         )
 
     SAMPLE_RATE = 16000

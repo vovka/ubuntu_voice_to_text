@@ -1,55 +1,31 @@
-[build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
-
-[project]
+[tool.poetry]
 name = "ubuntu-voice-to-text"
 version = "1.0.0"
 description = "A voice-to-text application for Ubuntu using speech recognition"
-authors = [
-    {name = "vovka", email = "vovka@example.com"},
-]
+authors = ["Volodymyr Shcherbyna "]
 readme = "README.md"
-requires-python = ">=3.8"
-classifiers = [
-    "Development Status :: 4 - Beta",
-    "Intended Audience :: End Users/Desktop",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: POSIX :: Linux",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-]
-dependencies = [
-    "vosk",
-    "keyboard",
-    "pynput",
-    "pystray",
-    "pillow",
-    "sounddevice",
-    "openai",
-]
+packages = [{include = "voice_typing"}]
 
-[project.optional-dependencies]
-test = [
-    "pytest>=7.0.0",
-    "pytest-cov>=4.0.0",
-    "coverage>=7.0.0",
-]
-lint = [
-    "flake8>=6.0.0",
-    "black>=23.0.0",
-]
-dev = [
-    "pytest>=7.0.0",
-    "pytest-cov>=4.0.0",
-    "coverage>=7.0.0",
-    "flake8>=6.0.0",
-    "black>=23.0.0",
-]
+[tool.poetry.dependencies]
+python = "^3.12"
+vosk = "^0.3.45"
+keyboard = "^0.13.5"
+pynput = "^1.7.6"
+pystray = "^0.19.5"
+pillow = "^9.4.0"
+sounddevice = "^0.4.6"
+openai = "^0.27.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.0.0"
+pytest-cov = "^4.0.0"
+coverage = "^7.0.0"
+flake8 = "^6.0.0"
+black = "^23.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -92,7 +68,7 @@ exclude_lines = [
 
 [tool.black]
 line-length = 88
-target-version = ['py38']
+target-version = ['py312']
 include = '\.pyi?$'
 extend-exclude = '''
 /(

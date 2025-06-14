@@ -33,7 +33,7 @@ This document provides instructions for running the Ubuntu Voice to Text applica
 
 ## Docker Image
 
-This project provides a Docker image built on Python 3.11 (Debian-based) that includes:
+This project provides a Docker image built on Python 3.12 (Debian-based) that includes:
 - **Size**: ~200MB (model downloaded separately)
 - **Use case**: Production deployments and development
 - **Build**: `docker-compose up --build`
@@ -182,7 +182,7 @@ To use a different Vosk model:
 3. Rebuild the image
 
 ### Dependencies
-Python dependencies are managed via `requirements.txt` and installed at build time for reliability.
+Python dependencies are managed via Poetry and `pyproject.toml`, and installed at build time for reliability. The `poetry.lock` file ensures reproducible builds across environments.
 
 ### Choosing Base Image
 - Use **Alpine** (default) for smaller images and production deployments

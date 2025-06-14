@@ -1,8 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-# Activate virtual environment
-source /app/venv/bin/activate
+# Poetry doesn't need venv activation in Docker since we disabled virtualenvs.create
 
 # Fix permissions for /models if running as root and UID/GID are set
 if [ "$(id -u)" = "0" ] && [ -n "${UID:-}" ] && [ -n "${GID:-}" ]; then
@@ -14,17 +13,17 @@ fi
 if [ "${1:-}" = "test" ]; then
     echo "🧪 Running tests..."
     shift  # Remove "test" from arguments
-    exec pytest tests/ --cov=. --cov-report=term-missing -v "$@"
+    exec poetry run pytest tests/ --cov=. --cov-report=term-missing -v "$@"
 elif [ "${1:-}" = "lint" ]; then
     echo "🔍 Running linting..."
     echo "Running flake8..."
-    flake8 . --max-line-length=88
+    poetry run flake8 . --max-line-length=88
     echo "Checking code formatting with black..."
-    black --check --diff .
+    poetry run black --check --diff .
     echo "✅ All linting checks passed!"
 elif [ "${1:-}" = "format" ]; then
     echo "🎨 Formatting code with black..."
-    black .
+    poetry run black .
     echo "✅ Code formatted!"
 elif [ "${1:-}" = "shell" ]; then
     echo "🐚 Starting interactive shell..."
