@@ -72,7 +72,6 @@ class PipelineVoiceTyping:
         print(f"[PipelineVoiceTyping] 🗣️ {text}")
         
         # Dispatch text through output dispatcher
-        import time
         metadata = {
             'confidence': 1.0,  # Pipeline doesn't provide confidence yet
             'timestamp': time.time(),
