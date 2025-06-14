@@ -8,6 +8,8 @@ import wave
 from typing import Dict, Any, Optional
 from .base import VoiceRecognitionSource
 
+DEFAULT_WHISPER_MODEL = "gpt-4o-transcribe"
+
 
 class WhisperRecognitionSource(VoiceRecognitionSource):
     """OpenAI Whisper ASR-based voice recognition source."""
@@ -15,7 +17,7 @@ class WhisperRecognitionSource(VoiceRecognitionSource):
     def __init__(self):
         self.client = None
         self.api_key = None
-        self.model = "whisper-1"
+        self.model = DEFAULT_WHISPER_MODEL
         self.sample_rate = 16000
         self._is_available = False
         self._audio_buffer = bytearray()
@@ -32,7 +34,7 @@ class WhisperRecognitionSource(VoiceRecognitionSource):
             bool: True if initialization was successful, False otherwise
         """
         self.api_key = config.get("api_key") or os.getenv("OPENAI_API_KEY")
-        self.model = config.get("model", "whisper-1")
+        self.model = config.get("model", "gpt-4o-transcribe")
         self.sample_rate = config.get("sample_rate", 16000)
 
         if not self.api_key:

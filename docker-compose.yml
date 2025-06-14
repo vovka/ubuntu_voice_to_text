@@ -17,7 +17,7 @@ services:
       # Voice recognition configuration
       - RECOGNITION_SOURCE=${RECOGNITION_SOURCE:-vosk}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - WHISPER_MODEL=${WHISPER_MODEL:-whisper-1}
+      - WHISPER_MODEL=${WHISPER_MODEL:-gpt-4o-transcribe}
     volumes:
       # X11 socket for GUI access
       - /tmp/.X11-unix:/tmp/.X11-unix:rw

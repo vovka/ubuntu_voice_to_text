@@ -191,7 +191,7 @@ def test_whisper_recognition_source_initialization():
         whisper_source = WhisperRecognitionSource()
 
         # Test initialization without API key
-        result = whisper_source.initialize({"model": "whisper-1"})
+        result = whisper_source.initialize({"model": "gpt-4o-transcribe"})
         assert result is False
         assert not whisper_source.is_available()
 
@@ -300,13 +300,13 @@ def test_config_recognition_source_selection():
             # Test environment variable support
             os.environ["RECOGNITION_SOURCE"] = "whisper"
             os.environ["OPENAI_API_KEY"] = "test-key"
-            os.environ["WHISPER_MODEL"] = "whisper-1"
+            os.environ["WHISPER_MODEL"] = "gpt-4o-transcribe"
 
             # Create new config instance to pick up environment changes
             config2 = Config()
             assert config2.RECOGNITION_SOURCE == "whisper"
             assert config2.OPENAI_API_KEY == "test-key"
-            assert config2.WHISPER_MODEL == "whisper-1"
+            assert config2.WHISPER_MODEL == "gpt-4o-transcribe"
 
         finally:
             # Restore original environment
