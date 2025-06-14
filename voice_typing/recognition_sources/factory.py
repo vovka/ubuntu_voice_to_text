@@ -3,6 +3,7 @@ Recognition Source Factory for backend selection and instantiation.
 """
 
 from typing import Dict, Any
+from ..config import Config
 from .base import VoiceRecognitionSource
 from .vosk_source import VoskRecognitionSource
 from .whisper_source import WhisperRecognitionSource
@@ -12,7 +13,7 @@ class RecognitionSourceFactory:
     """Factory for creating recognition source instances based on configuration."""
     
     @staticmethod
-    def create_recognition_source(config: 'Config') -> VoiceRecognitionSource:
+    def create_recognition_source(config: Config) -> VoiceRecognitionSource:
         """
         Create recognition source based on configuration.
         
@@ -36,7 +37,7 @@ class RecognitionSourceFactory:
             return VoskRecognitionSource()
     
     @staticmethod
-    def get_recognition_config(config: 'Config') -> Dict[str, Any]:
+    def get_recognition_config(config: Config) -> Dict[str, Any]:
         """
         Get configuration dictionary for the recognition source.
         
