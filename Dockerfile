@@ -44,13 +44,14 @@ COPY docker-entrypoint.sh .
 # Make entrypoint executable
 RUN chmod +x docker-entrypoint.sh
 
-# # Install the package in development mode
-RUN poetry install --no-root
+# Install the package in development mode
+# RUN poetry install --no-root
 
 # Set environment variables for audio and display
-ENV PULSE_RUNTIME_PATH=/run/user/1000/pulse
-ENV XDG_RUNTIME_DIR=/run/user/1000
-ENV DISPLAY=:0
+# # Commented out as they are set in compose file
+# ENV PULSE_RUNTIME_PATH=/run/user/1000/pulse
+# ENV XDG_RUNTIME_DIR=/run/user/1000
+# ENV DISPLAY=:0
 
 # Expose any necessary ports (none needed for this app)
 
