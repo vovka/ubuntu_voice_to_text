@@ -62,6 +62,10 @@ Defines how recognized text is delivered to different targets.
 - `FILE` - Write text to file
 - `CALLBACK` - Call custom function with text
 
+**New Components**:
+- `OutputDispatcher` - Manages multiple output targets and event distribution
+- `KeyboardOutputActionTarget` - Keyboard typing implementation using xdotool
+
 ### State Manager Interface
 
 **Location**: `voice_typing/interfaces/state_manager.py`  

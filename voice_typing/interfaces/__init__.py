@@ -7,7 +7,7 @@ and future modularity.
 """
 
 from .audio_input import AudioInputSource
-from .output_action import OutputActionTarget, OutputType
+from .output_action import OutputActionTarget, OutputType, OutputDispatcher, KeyboardOutputActionTarget
 from .state_manager import StateManager, VoiceTypingState, StateTransition
 
 # Re-export recognition source interface from its existing location
@@ -17,6 +17,8 @@ __all__ = [
     "AudioInputSource",
     "OutputActionTarget", 
     "OutputType",
+    "OutputDispatcher",
+    "KeyboardOutputActionTarget",
     "StateManager",
     "VoiceTypingState",
     "StateTransition",

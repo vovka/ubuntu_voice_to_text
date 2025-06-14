@@ -7,6 +7,7 @@ from .recognition_sources import (
     VoiceRecognitionSource,
     RecognitionSourceFactory,
 )
+from .interfaces.output_action import OutputDispatcher, KeyboardOutputActionTarget
 
 
 class AudioProcessor:
@@ -15,6 +16,7 @@ class AudioProcessor:
         config: Config,
         state_ref: GlobalState,
         recognition_source: Optional[VoiceRecognitionSource] = None,
+        output_dispatcher: Optional[OutputDispatcher] = None,
     ):
         self.state_ref = state_ref
 
@@ -30,6 +32,20 @@ class AudioProcessor:
         if not self.recognition_source.initialize(recognition_config):
             print("[AudioProcessor] ❌ Failed to initialize voice recognition source")
             sys.exit(1)
+
+        # Set up output dispatcher
+        if output_dispatcher is None:
+            output_dispatcher = OutputDispatcher()
+            output_dispatcher.initialize()
+            
+            # Add default keyboard output target
+            keyboard_target = KeyboardOutputActionTarget()
+            if keyboard_target.initialize({}):
+                output_dispatcher.add_target(keyboard_target)
+            else:
+                print("[AudioProcessor] ⚠️ Warning: Keyboard output target not available")
+        
+        self.output_dispatcher = output_dispatcher
 
         self.last_text_at = None
         self.listening_started_at = None
@@ -59,7 +75,14 @@ class AudioProcessor:
         if result.get("text"):
             self.last_text_at = time.time()
             print(f"[AudioProcessor] 🗣️ {result['text']}")
-            self.type_text(result["text"])
+            
+            # Dispatch text through output dispatcher
+            metadata = {
+                'confidence': result.get('confidence', 0.0),
+                'timestamp': self.last_text_at,
+                'source': 'AudioProcessor'
+            }
+            self.output_dispatcher.dispatch_text(result["text"], metadata)
 
         # Auto-disable after 5 seconds of inactivity (requirement: inactivity timeout)
         current_time = time.time()
@@ -89,9 +112,3 @@ class AudioProcessor:
             print("[AudioProcessor] finish_listening state: resetting to idle")
             print("[StateManager] State transition: finish_listening → idle (AudioProcessor timeout)")
             self.state_ref.state = "idle"
-
-    @staticmethod
-    def type_text(text):
-        import subprocess
-
-        subprocess.run(["xdotool", "type", text + " "])
