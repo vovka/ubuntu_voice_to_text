@@ -13,6 +13,12 @@ A simple voice-to-text application for Ubuntu that provides hands-free text inpu
 - **Real-time Processing**: Immediate text typing after speech recognition
 - **Configurable Backend**: Switch between recognition sources via environment variables
 
+## Requirements
+
+- **Python 3.12** or later
+- **Ubuntu** (tested on Ubuntu 20.04+, but should work on other Linux distributions)
+- **Audio system** (PulseAudio/ALSA)
+
 ## Quick Start
 
 ### Using Docker (Recommended)
@@ -294,7 +300,7 @@ docker-compose build && docker-compose --profile test run --rm test && docker-co
 #### CI/CD
 
 The project includes GitHub Actions workflow that automatically:
-- Tests on multiple Python versions (3.8-3.12)
+- Tests on Python 3.12
 - Runs linting with flake8
 - Checks code formatting with black
 - Generates coverage reports

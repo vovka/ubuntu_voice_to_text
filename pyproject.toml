@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [{include = "voice_typing"}]
 
 [tool.poetry.dependencies]
-python = "^3.8.1"
+python = "^3.12"
 vosk = "^0.3.45"
 keyboard = "^0.13.5"
 pynput = "^1.7.6"
@@ -68,7 +68,7 @@ exclude_lines = [
 
 [tool.black]
 line-length = 88
-target-version = ['py38']
+target-version = ['py312']
 include = '\.pyi?$'
 extend-exclude = '''
 /(

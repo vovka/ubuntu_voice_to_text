@@ -19,13 +19,19 @@ def test_pyproject_toml_has_poetry_config():
     """Test that pyproject.toml has Poetry configuration."""
     project_root = Path(__file__).parent.parent
     pyproject_toml = project_root / "pyproject.toml"
-    
+
     assert pyproject_toml.exists(), "pyproject.toml should exist"
-    
+
     content = pyproject_toml.read_text()
-    assert "[tool.poetry]" in content, "pyproject.toml should have [tool.poetry] section"
-    assert "[tool.poetry.dependencies]" in content, "pyproject.toml should have dependencies section"
-    assert "[tool.poetry.group.dev.dependencies]" in content, "pyproject.toml should have dev dependencies"
+    assert (
+        "[tool.poetry]" in content
+    ), "pyproject.toml should have [tool.poetry] section"
+    assert (
+        "[tool.poetry.dependencies]" in content
+    ), "pyproject.toml should have dependencies section"
+    assert (
+        "[tool.poetry.group.dev.dependencies]" in content
+    ), "pyproject.toml should have dev dependencies"
 
 
 def test_requirements_txt_removed():
@@ -39,55 +45,62 @@ def test_poetry_commands_work():
     """Test that basic Poetry commands work."""
     if os.getenv("SKIP_POETRY_TESTS"):
         import pytest
+
         pytest.skip("Skipping Poetry tests due to environment variable")
-    
+
     try:
         # Test poetry check
         result = subprocess.run(
-            ["poetry", "check"], 
+            ["poetry", "check"],
             cwd=Path(__file__).parent.parent,
-            capture_output=True, 
-            text=True, 
-            timeout=30
+            capture_output=True,
+            text=True,
+            timeout=30,
         )
         # Poetry check should succeed (exit code 0) even with warnings
         assert result.returncode == 0, f"poetry check failed: {result.stderr}"
-        
+
         # Test poetry show (should list installed packages)
         result = subprocess.run(
-            ["poetry", "show"], 
+            ["poetry", "show"],
             cwd=Path(__file__).parent.parent,
-            capture_output=True, 
-            text=True, 
-            timeout=30
+            capture_output=True,
+            text=True,
+            timeout=30,
         )
         assert result.returncode == 0, f"poetry show failed: {result.stderr}"
-        
+
         # Should have some expected packages
         output = result.stdout.lower()
         expected_packages = ["vosk", "pytest", "black", "flake8"]
         for package in expected_packages:
-            assert package in output, f"Expected package {package} not found in poetry show output"
-            
+            assert (
+                package in output
+            ), f"Expected package {package} not found in poetry show output"
+
     except FileNotFoundError:
         import pytest
+
         pytest.skip("Poetry not available in test environment")
     except subprocess.TimeoutExpired:
-        import pytest 
+        import pytest
+
         pytest.skip("Poetry commands timed out")
 
 
 def test_dev_dependencies_available():
     """Test that development dependencies are available."""
     project_root = Path(__file__).parent.parent
-    
+
     # These should be available if Poetry is set up correctly
     try:
         import pytest
         import coverage
+
         # These imports should work if dev dependencies are installed
         assert True
     except ImportError as e:
         # If we're not in Poetry environment, skip this test
         import pytest
+
         pytest.skip(f"Dev dependencies not available: {e}")
