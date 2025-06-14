@@ -14,6 +14,7 @@ from .global_state import GlobalState
 from .pipeline import AudioPipelineCoordinator, SoundDeviceAudioInput
 from .recognition_sources import RecognitionSourceFactory, VoiceRecognitionSource
 from .tray_icon_manager import TrayIconManager
+from .interfaces.output_action import OutputDispatcher, KeyboardOutputActionTarget
 
 
 class PipelineVoiceTyping:
@@ -30,6 +31,7 @@ class PipelineVoiceTyping:
         state_ref: GlobalState,
         tray_icon_manager: TrayIconManager,
         recognition_source: Optional[VoiceRecognitionSource] = None,
+        output_dispatcher: Optional[OutputDispatcher] = None,
     ):
         self.config = config
         self.state_ref = state_ref
@@ -43,6 +45,20 @@ class PipelineVoiceTyping:
             recognition_source = RecognitionSourceFactory.create_recognition_source(config)
         self.recognition_source = recognition_source
         
+        # Set up output dispatcher
+        if output_dispatcher is None:
+            output_dispatcher = OutputDispatcher()
+            output_dispatcher.initialize()
+            
+            # Add default keyboard output target
+            keyboard_target = KeyboardOutputActionTarget()
+            if keyboard_target.initialize({}):
+                output_dispatcher.add_target(keyboard_target)
+            else:
+                print("[PipelineVoiceTyping] ⚠️ Warning: Keyboard output target not available")
+        
+        self.output_dispatcher = output_dispatcher
+        
         # Pipeline coordinator
         self.pipeline_coordinator: Optional[AudioPipelineCoordinator] = None
         
@@ -54,13 +70,15 @@ class PipelineVoiceTyping:
     def _text_output_callback(self, text: str) -> None:
         """Handle recognized text output."""
         print(f"[PipelineVoiceTyping] 🗣️ {text}")
-        self._type_text(text)
-
-    @staticmethod
-    def _type_text(text: str) -> None:
-        """Type the recognized text."""
-        import subprocess
-        subprocess.run(["xdotool", "type", text + " "])
+        
+        # Dispatch text through output dispatcher
+        import time
+        metadata = {
+            'confidence': 1.0,  # Pipeline doesn't provide confidence yet
+            'timestamp': time.time(),
+            'source': 'PipelineVoiceTyping'
+        }
+        self.output_dispatcher.dispatch_text(text, metadata)
 
     def _setup_pipeline(self) -> bool:
         """Set up the audio pipeline coordinator."""
