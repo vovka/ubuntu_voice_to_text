@@ -41,6 +41,9 @@ addopts = [
     "--strict-markers",
     "-v",
 ]
+markers = [
+    "asyncio: mark test as asyncio to run it with an event loop",
+]
 
 [tool.coverage.run]
 source = ["."]
