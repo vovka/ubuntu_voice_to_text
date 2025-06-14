@@ -109,6 +109,13 @@ export WHISPER_MODEL=whisper-1  # Optional, defaults to whisper-1
 Set environment variables in your shell or create a `.env` file:
 
 ```bash
+# Copy the example configuration file
+cp .env.example .env
+# Edit .env file with your settings
+```
+
+Example `.env` file:
+```bash
 # .env file
 RECOGNITION_SOURCE=whisper
 OPENAI_API_KEY=sk-your-api-key-here
