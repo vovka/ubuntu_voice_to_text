@@ -1,4 +1,5 @@
 import threading
+import os
 
 from voice_typing import (
     Config,
@@ -27,7 +28,18 @@ if __name__ == "__main__":
     state_manager.register_state_listener(log_state_transitions)
     
     audio_processor = AudioProcessor(config, state_ref)
-    tray_icon_manager = TrayIconManager(state_ref)
+    
+    # Create TrayIconManager with StateManager subscription for decoupled UI
+    def handle_exit():
+        """Handle application exit cleanly."""
+        print("[Main] Application exit requested")
+        os._exit(0)
+    
+    tray_icon_manager = TrayIconManager(
+        state_ref=state_ref,  # Legacy support
+        state_manager=state_manager,  # New event-driven approach
+        exit_callback=handle_exit
+    )
     hotkey_manager = HotkeyManager(
         config, state_ref, tray_icon_manager, audio_processor, state_manager
     )
