@@ -12,6 +12,7 @@ from .recognition_sources import (
     VoiceRecognitionSource,
     VoskRecognitionSource,
     WhisperRecognitionSource,
+    RecognitionSourceFactory,
 )
 
 # Export new interfaces for decoupling and modularity
@@ -34,6 +35,7 @@ __all__ = [
     "VoiceRecognitionSource",
     "VoskRecognitionSource",
     "WhisperRecognitionSource",
+    "RecognitionSourceFactory",
     # New interfaces
     "AudioInputSource",
     "OutputActionTarget", 
