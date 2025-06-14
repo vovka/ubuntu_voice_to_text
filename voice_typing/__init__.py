@@ -3,6 +3,7 @@ Voice Typing package - Refactored classes for voice typing functionality.
 """
 
 from .config import Config
+from .configuration_loader import ConfigurationLoader
 from .global_state import GlobalState
 from .audio_processor import AudioProcessor
 from .tray_icon_manager import TrayIconManager
@@ -30,6 +31,7 @@ from .interfaces import (
 
 __all__ = [
     "Config",
+    "ConfigurationLoader",
     "GlobalState",
     "AudioProcessor",
     "TrayIconManager",
