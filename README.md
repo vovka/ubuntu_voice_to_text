@@ -101,7 +101,7 @@ export RECOGNITION_SOURCE=vosk
 # Use OpenAI Whisper (requires API key)
 export RECOGNITION_SOURCE=whisper
 export OPENAI_API_KEY=your_openai_api_key_here
-export WHISPER_MODEL=whisper-1  # Optional, defaults to whisper-1
+export WHISPER_MODEL=gpt-4o-transcribe  # Optional, defaults to gpt-4o-transcribe
 ```
 
 #### Using with Docker
@@ -112,7 +112,7 @@ Set environment variables in your shell or create a `.env` file:
 # .env file
 RECOGNITION_SOURCE=whisper
 OPENAI_API_KEY=sk-your-api-key-here
-WHISPER_MODEL=whisper-1
+WHISPER_MODEL=gpt-4o-transcribe
 ```
 
 Then run:
@@ -146,7 +146,7 @@ export RECOGNITION_SOURCE=vosk  # or whisper
 
 # OpenAI Whisper configuration
 export OPENAI_API_KEY=sk-your-api-key-here
-export WHISPER_MODEL=whisper-1
+export WHISPER_MODEL=gpt-4o-transcribe
 ```
 
 #### Docker Model Management
@@ -176,7 +176,7 @@ To use OpenAI Whisper ASR instead of Vosk:
    ```bash
    export RECOGNITION_SOURCE=whisper
    export OPENAI_API_KEY=sk-your-api-key-here
-   export WHISPER_MODEL=whisper-1  # Optional, defaults to whisper-1
+   export WHISPER_MODEL=gpt-4o-transcribe  # Optional, defaults to gpt-4o-transcribe
    ```
 
 3. **Run the application** (Docker or manual installation)
