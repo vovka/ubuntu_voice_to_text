@@ -109,6 +109,13 @@ export WHISPER_MODEL=gpt-4o-transcribe  # Optional, defaults to gpt-4o-transcrib
 Set environment variables in your shell or create a `.env` file:
 
 ```bash
+# Copy the example configuration file
+cp .env.example .env
+# Edit .env file with your settings
+```
+
+Example `.env` file:
+```bash
 # .env file
 RECOGNITION_SOURCE=whisper
 OPENAI_API_KEY=sk-your-api-key-here
