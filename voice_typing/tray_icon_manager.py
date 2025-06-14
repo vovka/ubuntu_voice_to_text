@@ -115,7 +115,7 @@ class TrayIconManager:
             self.icon = pystray.Icon("voice_typing", menu=menu)
             
             # Legacy support - set icon in state_ref if available
-            if self.state_ref:
+            if self.state_ref and not self.state_manager:
                 self.state_ref.icon = self.icon
             
             # Initialize icon with current state
@@ -144,10 +144,11 @@ class TrayIconManager:
             # Legacy behavior - read from state_ref directly
             if self.icon:
                 print(f"[TrayIconManager] Legacy update_icon: state={self.state_ref.state}")
-                self.icon.icon = self.create_image_text(self.state_ref.state)
-                if self.state_ref.state == "finish_listening":
-                    self.icon.title = "Voice Typing: finish_listening"
-                elif self.state_ref.state == "listening":
-                    self.icon.title = "Voice Typing: ON"
-                else:
-                    self.icon.title = "Voice Typing: OFF"
+                # Map legacy state_ref.state to VoiceTypingState
+                state_mapping = {
+                    "finish_listening": VoiceTypingState.FINISH_LISTENING,
+                    "listening": VoiceTypingState.LISTENING,
+                    "idle": VoiceTypingState.IDLE,
+                }
+                mapped_state = state_mapping.get(self.state_ref.state, VoiceTypingState.IDLE)
+                self._update_icon_for_state(mapped_state)
