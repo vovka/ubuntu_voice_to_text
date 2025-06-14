@@ -15,7 +15,7 @@ from .pipeline import AudioPipelineCoordinator, SoundDeviceAudioInput
 from .recognition_sources import RecognitionSourceFactory, VoiceRecognitionSource
 from .tray_icon_manager import TrayIconManager
 from .interfaces.output_action import OutputDispatcher, KeyboardOutputActionTarget
-
+import time
 
 class PipelineVoiceTyping:
     """
