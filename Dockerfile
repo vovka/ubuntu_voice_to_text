@@ -16,6 +16,7 @@ RUN apt-get update && apt-get install -y \
     linux-headers-amd64 \
     ffmpeg \
     libsndfile1 \
+    libjpeg-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Create application directory
@@ -43,8 +44,8 @@ COPY docker-entrypoint.sh .
 # Make entrypoint executable
 RUN chmod +x docker-entrypoint.sh
 
-# Install the package in development mode
-RUN poetry install --no-dev
+# # Install the package in development mode
+RUN poetry install --no-root
 
 # Set environment variables for audio and display
 ENV PULSE_RUNTIME_PATH=/run/user/1000/pulse
