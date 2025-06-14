@@ -34,7 +34,7 @@ class WhisperRecognitionSource(VoiceRecognitionSource):
             bool: True if initialization was successful, False otherwise
         """
         self.api_key = config.get("api_key") or os.getenv("OPENAI_API_KEY")
-        self.model = config.get("model", "gpt-4o-transcribe")
+        self.model = config.get("model", DEFAULT_WHISPER_MODEL)
         self.sample_rate = config.get("sample_rate", 16000)
 
         if not self.api_key:
