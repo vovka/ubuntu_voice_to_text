@@ -51,7 +51,7 @@ class SoundDeviceAudioInput(AudioInputSource):
             
             if self._callback:
                 # Convert numpy array to bytes
-                audio_bytes = bytes(indata)
+                audio_bytes = indata.tobytes()
                 self._callback(audio_bytes)
 
         try:

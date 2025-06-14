@@ -48,13 +48,14 @@ class AudioCaptureStage(AudioPipelineStage):
             if self._output_queue and self._running:
                 try:
                     # Use asyncio.run_coroutine_threadsafe to safely put from callback thread
-                    loop = asyncio.get_event_loop()
-                    asyncio.run_coroutine_threadsafe(
-                        self._output_queue.put(audio_chunk), loop
-                    )
+                    if self._event_loop:
+                        asyncio.run_coroutine_threadsafe(
+                            self._output_queue.put(audio_chunk), self._event_loop
+                        )
                 except Exception as e:
                     print(f"[AudioCaptureStage] Error putting audio chunk: {e}")
 
+        self._event_loop = asyncio.get_running_loop()
         if self._audio_input.start_capture(audio_callback):
             self._running = True
             return True
