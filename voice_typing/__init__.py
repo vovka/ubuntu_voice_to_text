@@ -8,6 +8,7 @@ from .audio_processor import AudioProcessor
 from .tray_icon_manager import TrayIconManager
 from .hotkey_manager import HotkeyManager
 from .voice_typing_app import VoiceTyping
+from .pipeline_voice_typing import PipelineVoiceTyping
 from .recognition_sources import (
     VoiceRecognitionSource,
     VoskRecognitionSource,
@@ -32,6 +33,7 @@ __all__ = [
     "TrayIconManager",
     "HotkeyManager",
     "VoiceTyping",
+    "PipelineVoiceTyping",
     "VoiceRecognitionSource",
     "VoskRecognitionSource",
     "WhisperRecognitionSource",

@@ -9,6 +9,7 @@ independent components.
 from .interfaces import AudioPipelineStage, PipelineCoordinator
 from .stages import AudioCaptureStage, AudioBufferingStage, RecognitionStage
 from .coordinator import AudioPipelineCoordinator
+from .audio_input import SoundDeviceAudioInput
 
 __all__ = [
     "AudioPipelineStage",
@@ -17,4 +18,5 @@ __all__ = [
     "AudioBufferingStage",
     "RecognitionStage",
     "AudioPipelineCoordinator",
+    "SoundDeviceAudioInput",
 ]
