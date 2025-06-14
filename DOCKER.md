@@ -33,7 +33,7 @@ This document provides instructions for running the Ubuntu Voice to Text applica
 
 ## Docker Image
 
-This project provides a Docker image built on Python 3.11 (Debian-based) that includes:
+This project provides a Docker image built on Python 3.12 (Debian-based) that includes:
 - **Size**: ~200MB (model downloaded separately)
 - **Use case**: Production deployments and development
 - **Build**: `docker-compose up --build`
