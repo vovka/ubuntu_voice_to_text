@@ -58,14 +58,23 @@ For detailed Docker setup instructions, see [DOCKER.md](DOCKER.md).
    ```bash
    poetry install
    ```
+   
+   > **Note**: This project uses Poetry for dependency management. The `pyproject.toml` file serves as the single source of truth for all dependencies. If you need to regenerate a `requirements.txt` file for legacy systems, use:
+   > ```bash
+   > poetry export -f requirements.txt --output requirements.txt
+   > ```
 
 4. **Download the Vosk model (required for manual installation):**
    ```bash
-   ./download-model.sh
+   ./scripts/download-model.sh
    ```
 
-5. **Set the model path and run the application:**
+5. **Run the application:**
    ```bash
+   # Option 1: Using Poetry CLI entry point (recommended)
+   poetry run ubuntu-voice-to-text
+   
+   # Option 2: Using Python directly
    export VOSK_MODEL_PATH="$(pwd)/vosk-model-small-en-us-0.15"
    poetry run python main.py
    ```
@@ -86,9 +95,54 @@ For detailed Docker setup instructions, see [DOCKER.md](DOCKER.md).
 - **Green**: Actively listening/recording
 - **Blue**: Processing speech
 
+## Project Structure
+
+```
+ubuntu_voice_to_text/
+├── main.py                 # Main application entry point
+├── pyproject.toml         # Poetry configuration and dependencies
+├── voice_typing/          # Core application package
+├── tests/                 # Test suite
+├── scripts/               # Utility scripts
+│   ├── docker-entrypoint.sh  # Docker container entrypoint
+│   └── download-model.sh      # Vosk model download script
+├── examples/              # Usage examples
+├── docs/                  # Documentation
+├── Dockerfile             # Docker container configuration
+└── README.md              # This file
+```
+
+### Scripts Directory
+
+The `scripts/` directory contains utility scripts for setup and deployment:
+
+- **`download-model.sh`**: Downloads the Vosk speech recognition model for manual installations
+- **`docker-entrypoint.sh`**: Container entrypoint script for Docker deployments
+
+### CLI Entry Point
+
+The application provides a Poetry-managed CLI entry point:
+
+```bash
+# Install the package
+poetry install
+
+# Run using the CLI entry point
+poetry run ubuntu-voice-to-text
+```
+
 ## Configuration
 
-The application can be configured via environment variables or by modifying `main.py`:
+The application can be configured via environment variables or by modifying `main.py`.
+
+### CLI Usage
+
+The application can be started using the Poetry CLI entry point:
+```bash
+poetry run ubuntu-voice-to-text
+```
+
+This is equivalent to running `python main.py` but provides a cleaner interface.
 
 ### Voice Recognition Source
 
