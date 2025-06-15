@@ -92,14 +92,14 @@ await coordinator.cleanup()
 ### Integration with Existing System
 
 ```python
-from voice_typing import PipelineVoiceTyping, Config, GlobalState, TrayIconManager
+from voice_typing import PipelineVoiceTyping, Config, BasicStateManager, TrayIconManager
 
 # Use pipeline-based voice typing
 config = Config()
-state_ref = GlobalState()
-tray_manager = TrayIconManager(state_ref, None, lambda: None)
+state_manager = BasicStateManager()
+tray_manager = TrayIconManager(state_manager, lambda: None)
 
-voice_typing = PipelineVoiceTyping(config, state_ref, tray_manager)
+voice_typing = PipelineVoiceTyping(config, state_manager, tray_manager)
 voice_typing.voice_typing_loop()  # Runs with pipeline system
 ```
 
@@ -179,15 +179,6 @@ python demo_pipeline.py
 - Pipeline runs in separate thread with async event loop
 - Avoids blocking main application thread
 - Clean shutdown handling prevents resource leaks
-
-## Backward Compatibility
-
-The pipeline system maintains full backward compatibility:
-
-- Existing `VoiceTyping` class continues to work unchanged
-- New `PipelineVoiceTyping` provides pipeline-based alternative
-- Same interfaces and configuration options
-- No breaking changes to existing code
 
 ## Future Enhancements
 

@@ -4,29 +4,23 @@ from .interfaces.state_manager import StateManager, StateTransition, VoiceTyping
 
 
 class TrayIconManager:
-    def __init__(self, state_ref=None, state_manager: Optional[StateManager] = None, 
+    def __init__(self, state_manager: StateManager, 
                  exit_callback: Optional[Callable[[], None]] = None):
         """
         Initialize TrayIconManager as a pure UI subscriber.
         
         Args:
-            state_ref: Legacy GlobalState reference (for backward compatibility)
             state_manager: StateManager instance to subscribe to state changes
             exit_callback: Callback function to handle exit requests
         """
-        # Legacy support - if only state_ref is provided, use old behavior
-        self.state_ref = state_ref  # Keep for backward compatibility
         self.state_manager = state_manager
         self.exit_callback = exit_callback
         self.icon = None
         self._current_state = VoiceTypingState.IDLE
         
-        # Subscribe to state changes if state_manager is provided
-        if self.state_manager:
-            self.state_manager.register_state_listener(self._on_state_change)
-            print("[TrayIconManager] Subscribed to state changes via StateManager")
-        elif self.state_ref:
-            print("[TrayIconManager] Using legacy state_ref mode - consider migrating to StateManager")
+        # Subscribe to state changes
+        self.state_manager.register_state_listener(self._on_state_change)
+        print("[TrayIconManager] Subscribed to state changes via StateManager")
 
     def create_image_text(self, state="idle"):
         try:
@@ -102,7 +96,7 @@ class TrayIconManager:
         if self.exit_callback:
             self.exit_callback()
         else:
-            # Fallback if no callback provided (backward compatibility)
+            # Default exit behavior
             os._exit(0)
 
     def tray_thread(self):
@@ -114,10 +108,6 @@ class TrayIconManager:
             menu = pystray.Menu(pystray.MenuItem("Exit", self.exit_application))
             self.icon = pystray.Icon("voice_typing", menu=menu)
             
-            # Legacy support - set icon in state_ref if available
-            if self.state_ref and not self.state_manager:
-                self.state_ref.icon = self.icon
-            
             # Initialize icon with current state
             self._update_icon_for_state(self._current_state)
             self.icon.run()
@@ -126,29 +116,3 @@ class TrayIconManager:
                 "[TrayIconManager] pystray not available, "
                 "tray icon functionality disabled"
             )
-
-    def update_icon(self):
-        """
-        Backward compatibility method.
-        
-        This method is kept for backward compatibility but should not be used
-        in new code. The TrayIconManager now updates automatically through
-        state change events.
-        """
-        if self.state_manager:
-            print("[TrayIconManager] WARNING: update_icon() called - this method is deprecated. "
-                  "TrayIconManager now updates automatically via state events.")
-            # Update with current state
-            self._update_icon_for_state(self._current_state)
-        elif self.state_ref:
-            # Legacy behavior - read from state_ref directly
-            if self.icon:
-                print(f"[TrayIconManager] Legacy update_icon: state={self.state_ref.state}")
-                # Map legacy state_ref.state to VoiceTypingState
-                state_mapping = {
-                    "finish_listening": VoiceTypingState.FINISH_LISTENING,
-                    "listening": VoiceTypingState.LISTENING,
-                    "idle": VoiceTypingState.IDLE,
-                }
-                mapped_state = state_mapping.get(self.state_ref.state, VoiceTypingState.IDLE)
-                self._update_icon_for_state(mapped_state)

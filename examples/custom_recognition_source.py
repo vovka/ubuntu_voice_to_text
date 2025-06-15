@@ -47,18 +47,18 @@ class MockRecognitionSource(VoiceRecognitionSource):
 
 def example_usage():
     """Example of how to use a custom recognition source."""
-    from voice_typing import AudioProcessor, Config, GlobalState
+    from voice_typing import AudioProcessor, Config, BasicStateManager
 
     # Create configuration and state
     config = Config()
-    state_ref = GlobalState()
+    state_manager = BasicStateManager()
 
     # Create custom recognition source
     mock_source = MockRecognitionSource()
 
     # Create AudioProcessor with custom source
     try:
-        audio_processor = AudioProcessor(config, state_ref, mock_source)
+        audio_processor = AudioProcessor(config, state_manager, mock_source)
         print("✅ AudioProcessor created successfully with custom source!")
 
         # Simulate processing some audio chunks
