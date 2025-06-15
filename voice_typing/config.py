@@ -1,37 +1,56 @@
-import os
+from typing import Dict, Any, Optional, Set
+from .configuration_loader import ConfigurationLoader
 
 
 class Config:
-    @property
-    def MODEL_PATH(self):
-        """Get model path from environment variable or use default."""
-        return os.getenv(
-            "VOSK_MODEL_PATH", os.path.expanduser("/models/vosk-model-small-en-us-0.15")
-        )
-
-    SAMPLE_RATE = 16000
-
-    @property
-    def RECOGNITION_SOURCE(self):
-        """Get recognition source from environment variable, default to 'vosk'."""
-        return os.getenv("RECOGNITION_SOURCE", "vosk")
-
-    @property
-    def OPENAI_API_KEY(self):
-        """Get OpenAI API key from environment variable."""
-        return os.getenv("OPENAI_API_KEY")
-
-    @property
-    def WHISPER_MODEL(self):
-        """Get Whisper model from environment variable, default to 'gpt-4o-transcribe'."""
-        return os.getenv("WHISPER_MODEL", "gpt-4o-transcribe")
+    """
+    Configuration class that receives configuration values via constructor
+    instead of reading environment variables directly.
+    """
+    
+    def __init__(self, config_dict: Optional[Dict[str, Any]] = None):
+        """
+        Initialize configuration with provided values or load from ConfigurationLoader.
+        
+        Args:
+            config_dict: Optional configuration dictionary. If None, loads using ConfigurationLoader.
+        """
+        if config_dict is None:
+            config_dict = ConfigurationLoader.load_configuration()
+        
+        self._model_path = config_dict.get("model_path")
+        self._sample_rate = config_dict.get("sample_rate", 16000)
+        self._recognition_source = config_dict.get("recognition_source", "vosk")
+        self._openai_api_key = config_dict.get("openai_api_key")
+        self._whisper_model = config_dict.get("whisper_model", "gpt-4o-transcribe")
+        self._hotkey_combo = config_dict.get("hotkey_combo", set())
 
     @property
-    def HOTKEY_COMBO(self):
-        try:
-            from pynput import keyboard
+    def MODEL_PATH(self) -> str:
+        """Get model path."""
+        return self._model_path
 
-            return {keyboard.Key.cmd, keyboard.Key.shift}  # Win+Shift
-        except ImportError:
-            # Fallback for testing without dependencies
-            return set()
+    @property
+    def SAMPLE_RATE(self) -> int:
+        """Get sample rate."""
+        return self._sample_rate
+
+    @property
+    def RECOGNITION_SOURCE(self) -> str:
+        """Get recognition source."""
+        return self._recognition_source
+
+    @property
+    def OPENAI_API_KEY(self) -> Optional[str]:
+        """Get OpenAI API key."""
+        return self._openai_api_key
+
+    @property
+    def WHISPER_MODEL(self) -> str:
+        """Get Whisper model."""
+        return self._whisper_model
+
+    @property
+    def HOTKEY_COMBO(self) -> Set:
+        """Get hotkey combination."""
+        return self._hotkey_combo
