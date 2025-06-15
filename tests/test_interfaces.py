@@ -137,46 +137,12 @@ def test_state_manager_interface():
 
 
 def test_mock_audio_input_implementation():
-    """Test that AudioInputSource can be implemented."""
+    """Test that AudioInputSource can be implemented using centralized mock."""
     try:
-        from voice_typing.interfaces import AudioInputSource
-        
-        class MockAudioInput(AudioInputSource):
-            def __init__(self):
-                self._initialized = False
-                self._capturing = False
-                self._callback = None
-            
-            def initialize(self, config: Dict[str, Any]) -> bool:
-                self._initialized = True
-                return True
-            
-            def start_capture(self, callback: Callable[[bytes], None]) -> bool:
-                if not self._initialized:
-                    return False
-                self._callback = callback
-                self._capturing = True
-                return True
-            
-            def stop_capture(self) -> None:
-                self._capturing = False
-                self._callback = None
-            
-            def is_capturing(self) -> bool:
-                return self._capturing
-            
-            def is_available(self) -> bool:
-                return True
-            
-            def cleanup(self) -> None:
-                self.stop_capture()
-                self._initialized = False
-            
-            def get_device_info(self) -> Optional[Dict[str, Any]]:
-                return {'name': 'Mock Device', 'channels': 1}
+        from voice_typing.testing import MockAudioInputSource
         
         # Test implementation
-        audio_input = MockAudioInput()
+        audio_input = MockAudioInputSource()
         
         # Test initialization
         config = {'sample_rate': 16000}
@@ -192,8 +158,7 @@ def test_mock_audio_input_implementation():
         assert audio_input.is_capturing() == True
         
         # Simulate receiving audio chunk
-        if audio_input._callback:
-            audio_input._callback(b'test_audio_data')
+        audio_input.simulate_audio_chunk(b'test_audio_data')
         
         assert len(received_chunks) == 1
         assert received_chunks[0] == b'test_audio_data'
@@ -211,39 +176,13 @@ def test_mock_audio_input_implementation():
 
 
 def test_mock_output_action_implementation():
-    """Test that OutputActionTarget can be implemented."""
+    """Test that OutputActionTarget can be implemented using centralized mock."""
     try:
-        from voice_typing.interfaces import OutputActionTarget, OutputType
-        
-        class MockOutputTarget(OutputActionTarget):
-            def __init__(self):
-                self._initialized = False
-                self._delivered_texts = []
-            
-            def initialize(self, config: Dict[str, Any]) -> bool:
-                self._initialized = True
-                return True
-            
-            def deliver_text(self, text: str, metadata: Optional[Dict[str, Any]] = None) -> bool:
-                if not self._initialized:
-                    return False
-                self._delivered_texts.append((text, metadata))
-                return True
-            
-            def is_available(self) -> bool:
-                return True
-            
-            def get_output_type(self) -> OutputType:
-                return OutputType.CALLBACK
-            
-            def supports_formatting(self) -> bool:
-                return False
-            
-            def cleanup(self) -> None:
-                self._delivered_texts.clear()
+        from voice_typing.testing import MockOutputActionTarget
+        from voice_typing.interfaces import OutputType
         
         # Test implementation
-        output_target = MockOutputTarget()
+        output_target = MockOutputActionTarget()
         
         # Test initialization
         config = {}
@@ -256,14 +195,15 @@ def test_mock_output_action_implementation():
         metadata = {'confidence': 0.95}
         assert output_target.deliver_text("hello world", metadata) == True
         
-        assert len(output_target._delivered_texts) == 1
-        text, meta = output_target._delivered_texts[0]
+        delivered_texts = output_target.get_delivered_texts()
+        assert len(delivered_texts) == 1
+        text, meta = delivered_texts[0]
         assert text == "hello world"
         assert meta == metadata
         
         # Test cleanup
         output_target.cleanup()
-        assert len(output_target._delivered_texts) == 0
+        assert len(output_target.get_delivered_texts()) == 0
         
         print("Mock OutputActionTarget implementation works correctly")
         
