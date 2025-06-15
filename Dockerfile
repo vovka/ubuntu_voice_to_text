@@ -46,10 +46,10 @@ RUN if [ "$INSTALL_DEV_DEPS" = "true" ]; then \
 COPY main.py .
 COPY tests/ tests/
 COPY voice_typing/ voice_typing/
-COPY docker-entrypoint.sh .
+COPY scripts/ scripts/
 
 # Make entrypoint executable
-RUN chmod +x docker-entrypoint.sh
+RUN chmod +x scripts/docker-entrypoint.sh
 
 # Install the package in development mode
 # RUN poetry install --no-root
@@ -63,4 +63,4 @@ RUN chmod +x docker-entrypoint.sh
 # Expose any necessary ports (none needed for this app)
 
 # Set the entrypoint
-ENTRYPOINT ["/app/docker-entrypoint.sh"]
+ENTRYPOINT ["/app/scripts/docker-entrypoint.sh"]

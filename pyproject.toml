@@ -6,6 +6,9 @@ authors = ["Volodymyr Shcherbyna "]
 readme = "README.md"
 packages = [{include = "voice_typing"}]
 
+[tool.poetry.scripts]
+ubuntu-voice-to-text = "main:main"
+
 [tool.poetry.dependencies]
 python = "^3.12"
 vosk = "^0.3.45"

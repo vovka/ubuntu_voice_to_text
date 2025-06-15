@@ -10,8 +10,9 @@ from voice_typing import (
     BasicStateManager,
 )
 
-# --- Main ---
-if __name__ == "__main__":
+
+def main():
+    """Main entry point for the Ubuntu Voice to Text application."""
     config = Config()
     
     # Create modern state manager
@@ -51,3 +52,8 @@ if __name__ == "__main__":
     
     # Main thread: voice typing
     voice_typing.voice_typing_loop()
+
+
+# --- Main ---
+if __name__ == "__main__":
+    main()
