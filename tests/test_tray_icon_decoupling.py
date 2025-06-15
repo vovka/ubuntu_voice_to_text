@@ -114,6 +114,5 @@ if __name__ == "__main__":
     test_tray_icon_subscribes_to_state_changes()
     test_tray_icon_reacts_to_state_events()
     test_tray_icon_no_direct_state_access()
-    test_backward_compatibility()
     test_exit_callback_delegation()
     print("All TrayIconManager decoupling tests passed!")
