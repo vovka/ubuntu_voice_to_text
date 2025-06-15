@@ -61,13 +61,11 @@ def test_pipeline_voice_typing_initialization():
     pipeline_voice_typing = PipelineVoiceTyping(
         config, 
         state_manager, 
-        tray_manager,
         recognition_source=mock_recognition
     )
     
     assert pipeline_voice_typing.config == config
     assert pipeline_voice_typing.state_manager == state_manager
-    assert pipeline_voice_typing.tray_icon_manager == tray_manager
     assert pipeline_voice_typing.recognition_source == mock_recognition
     assert pipeline_voice_typing.audio_input is not None
     
@@ -84,7 +82,6 @@ def test_pipeline_system_startup_shutdown():
     pipeline_voice_typing = PipelineVoiceTyping(
         config,
         state_manager,
-        tray_manager,
         recognition_source=mock_recognition
     )
     
@@ -117,7 +114,6 @@ def test_pipeline_state_integration():
     pipeline_voice_typing = PipelineVoiceTyping(
         config,
         state_manager,
-        tray_manager,
         recognition_source=mock_recognition
     )
     
