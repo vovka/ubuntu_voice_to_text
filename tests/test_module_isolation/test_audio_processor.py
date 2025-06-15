@@ -312,6 +312,41 @@ def test_no_timeout_when_recent_activity():
     assert state.state == "listening"
 
 
+def test_inactivity_timeout_with_no_recognition_result():
+    """Test inactivity timeout when no recognition result is available (demonstrates the bug)."""
+    from voice_typing.audio_processor import AudioProcessor
+    from voice_typing.testing import MockVoiceRecognitionSource
+    from voice_typing.global_state import GlobalState
+    
+    # Create processor with mock dependencies
+    recognition_source = MockVoiceRecognitionSource()
+    output_dispatcher = MagicMock()
+    state = GlobalState()
+    state.state = "listening"
+    
+    processor = AudioProcessor(
+        config=MagicMock(),
+        state_ref=state,
+        recognition_source=recognition_source,
+        output_dispatcher=output_dispatcher
+    )
+    
+    # Start listening and simulate time passage
+    processor.start_listening()
+    processor.listening_started_at = time.time() - 6  # 6 seconds ago
+    
+    # Clear any existing results to ensure get_result() returns None
+    recognition_source.cleanup()
+    recognition_source.initialize({})
+    
+    # Process empty buffer (simulates silence/inactivity with no recognition result)
+    processor.process_buffer([])
+    
+    # BUG: State should change to idle due to timeout, but currently doesn't
+    # because timeout logic is skipped when get_result() returns None
+    assert state.state == "idle", "Should timeout to idle state even without recognition results"
+
+
 if __name__ == "__main__":
     # Run tests manually if called directly
     test_audio_processor_initialization_with_provided_dependencies()
@@ -319,5 +354,6 @@ if __name__ == "__main__":
     test_process_buffer_with_no_result()
     test_process_buffer_with_text_result()
     test_no_timeout_when_recent_activity()
+    test_inactivity_timeout_with_no_recognition_result()
     
     print("✅ All AudioProcessor unit tests passed!")

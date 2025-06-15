@@ -67,24 +67,8 @@ class AudioProcessor:
         for chunk in buffer:
             self.recognition_source.process_audio_chunk(chunk)
 
-        result = self.recognition_source.get_result()
-        if result is None:
-            return
-
-        print(f"[AudioProcessor] Recognizer result (final): {result}")
-        if result.get("text"):
-            self.last_text_at = time.time()
-            print(f"[AudioProcessor] 🗣️ {result['text']}")
-            
-            # Dispatch text through output dispatcher
-            metadata = {
-                'confidence': result.get('confidence', 0.0),
-                'timestamp': self.last_text_at,
-                'source': 'AudioProcessor'
-            }
-            self.output_dispatcher.dispatch_text(result["text"], metadata)
-
         # Auto-disable after 5 seconds of inactivity (requirement: inactivity timeout)
+        # IMPORTANT: Check timeout before getting result to ensure it runs even when no result is available
         current_time = time.time()
 
         # For 'listening' state: check if 5 seconds passed since last text OR start
@@ -112,3 +96,20 @@ class AudioProcessor:
             print("[AudioProcessor] finish_listening state: resetting to idle")
             print("[StateManager] State transition: finish_listening → idle (AudioProcessor timeout)")
             self.state_ref.state = "idle"
+
+        result = self.recognition_source.get_result()
+        if result is None:
+            return
+
+        print(f"[AudioProcessor] Recognizer result (final): {result}")
+        if result.get("text"):
+            self.last_text_at = time.time()
+            print(f"[AudioProcessor] 🗣️ {result['text']}")
+            
+            # Dispatch text through output dispatcher
+            metadata = {
+                'confidence': result.get('confidence', 0.0),
+                'timestamp': self.last_text_at,
+                'source': 'AudioProcessor'
+            }
+            self.output_dispatcher.dispatch_text(result["text"], metadata)
