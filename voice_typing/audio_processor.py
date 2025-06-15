@@ -2,7 +2,7 @@ import sys
 from typing import Optional
 
 from .config import Config
-from .interfaces.state_manager import StateManager, VoiceTypingState
+from .interfaces.state_manager import StateManager, VoiceTypingState, StateTransition
 from .recognition_sources import (
     VoiceRecognitionSource,
     RecognitionSourceFactory,
@@ -49,6 +49,26 @@ class AudioProcessor:
 
         self.last_text_at = None
         self.listening_started_at = None
+        
+        # Subscribe to state changes to reset listening timer automatically
+        self.state_manager.register_state_listener(self._on_state_change)
+        print("[AudioProcessor] Subscribed to state changes via StateManager")
+
+    def _on_state_change(self, transition: StateTransition) -> None:
+        """
+        React to state changes by resetting listening timer when needed.
+        
+        This replaces the need for external components to call start_listening() directly.
+        
+        Args:
+            transition: StateTransition object containing state change details
+        """
+        print(f"[AudioProcessor] State changed: {transition.from_state.value} → {transition.to_state.value}")
+        
+        # Reset listening timer when starting to listen
+        if transition.to_state == VoiceTypingState.LISTENING:
+            print("[AudioProcessor] State transition to LISTENING - resetting timer")
+            self.start_listening()
 
     def start_listening(self):
         """Reset timers when listening starts to enable inactivity timeout"""

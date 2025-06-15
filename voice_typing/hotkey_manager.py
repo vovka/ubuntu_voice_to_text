@@ -4,12 +4,10 @@ from .interfaces.state_manager import StateManager, VoiceTypingState
 
 class HotkeyManager:
     def __init__(
-        self, config: Config, state_manager: StateManager, tray_icon_manager=None, audio_processor=None
+        self, config: Config, state_manager: StateManager
     ):
         self.config = config
         self.state_manager = state_manager
-        self.tray_icon_manager = tray_icon_manager
-        self.audio_processor = audio_processor
         self._combo_pressed = False  # Track if combo was pressed
         self._current_keys = set()  # Track currently pressed keys
 
@@ -60,9 +58,6 @@ class HotkeyManager:
                                              metadata={'source': 'hotkey_manager'})
         if success:
             print(f"[HotkeyManager] Voice typing state: {new_state_enum.value}")
-            # Reset listening timer when starting to listen (requirement: timer reset)
-            if new_state_enum == VoiceTypingState.LISTENING and self.audio_processor:
-                self.audio_processor.start_listening()
         else:
             print(f"[HotkeyManager] Failed to transition to state: {new_state_enum}")
 

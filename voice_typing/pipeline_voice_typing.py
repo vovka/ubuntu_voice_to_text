@@ -12,7 +12,6 @@ from .config import Config
 from .interfaces.state_manager import StateManager, VoiceTypingState
 from .pipeline import AudioPipelineCoordinator, SoundDeviceAudioInput
 from .recognition_sources import RecognitionSourceFactory, VoiceRecognitionSource
-from .tray_icon_manager import TrayIconManager
 from .interfaces.output_action import OutputDispatcher, KeyboardOutputActionTarget
 import time
 
@@ -28,13 +27,11 @@ class PipelineVoiceTyping:
         self,
         config: Config,
         state_manager: StateManager,
-        tray_icon_manager: TrayIconManager,
         recognition_source: Optional[VoiceRecognitionSource] = None,
         output_dispatcher: Optional[OutputDispatcher] = None,
     ):
         self.config = config
         self.state_manager = state_manager
-        self.tray_icon_manager = tray_icon_manager
         
         # Create audio input
         self.audio_input = SoundDeviceAudioInput()
