@@ -38,14 +38,12 @@ if __name__ == "__main__":
     
     # Use pipeline-based voice typing system
     print("[Main] Using pipeline-based voice typing system")
-    voice_typing = PipelineVoiceTyping(config, state_manager, tray_icon_manager)
+    voice_typing = PipelineVoiceTyping(config, state_manager)
     
-    # Create audio processor for hotkey manager
+    # Create audio processor for event-driven timer reset
     audio_processor = AudioProcessor(config, state_manager)
     
-    hotkey_manager = HotkeyManager(
-        config, state_manager, tray_icon_manager, audio_processor
-    )
+    hotkey_manager = HotkeyManager(config, state_manager)
 
     # Start tray and hotkey threads
     threading.Thread(target=tray_icon_manager.tray_thread, daemon=True).start()
