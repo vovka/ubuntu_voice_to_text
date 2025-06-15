@@ -31,9 +31,16 @@ COPY pyproject.toml poetry.lock ./
 # Configure Poetry to not create virtual environment (we'll use the system Python)
 RUN poetry config virtualenvs.create false
 
+ARG INSTALL_DEV_DEPS=false
 # Install dependencies with increased timeout for network issues
 ENV POETRY_REQUESTS_TIMEOUT=60
-RUN poetry install --only=main --no-root -v
+# Use the build arg to decide which dependencies to install
+RUN if [ "$INSTALL_DEV_DEPS" = "true" ]; then \
+      poetry install --with=dev --no-root -v ; \
+    else \
+      poetry install --only=main --no-root -v ; \
+    fi
+# RUN poetry install --only=main --no-root -v
 
 # Copy application files
 COPY main.py .
