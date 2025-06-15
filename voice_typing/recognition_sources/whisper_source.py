@@ -33,7 +33,7 @@ class WhisperRecognitionSource(VoiceRecognitionSource):
         Returns:
             bool: True if initialization was successful, False otherwise
         """
-        self.api_key = config.get("openai_api_key")
+        self.api_key = config.get("api_key")
         self.model = config.get("model", DEFAULT_WHISPER_MODEL)
         self.sample_rate = config.get("sample_rate", 16000)
 
