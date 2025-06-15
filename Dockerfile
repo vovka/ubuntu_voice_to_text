@@ -43,7 +43,7 @@ RUN if [ "$INSTALL_DEV_DEPS" = "true" ]; then \
 # RUN poetry install --only=main --no-root -v
 
 # Copy application files
-COPY main.py .
+COPY main.py main_pipeline.py .
 COPY tests/ tests/
 COPY voice_typing/ voice_typing/
 COPY docker-entrypoint.sh .

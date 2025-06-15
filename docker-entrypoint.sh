@@ -106,5 +106,6 @@ else
 
     # Run the application
     export PYTHONPATH=/app
-    exec python3 /app/main.py "$@"
+    # exec python3 /app/main.py "$@"
+    exec python3 /app/main_pipeline.py --pipeline "$@"
 fi
