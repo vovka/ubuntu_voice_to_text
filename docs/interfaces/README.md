@@ -96,6 +96,31 @@ See individual interface documentation files for detailed usage examples:
 - [Output Action Interface](output_action.md)
 - [State Manager Interface](state_manager.md)
 
+## Testing
+
+### Centralized Mock Library
+
+All interfaces have corresponding mock implementations for testing:
+
+```python
+from voice_typing.testing import (
+    MockAudioInputSource,
+    MockVoiceRecognitionSource, 
+    MockOutputActionTarget,
+    MockStateManager
+)
+
+# Use mocks in unit tests
+audio_input = MockAudioInputSource()
+audio_input.initialize({'sample_rate': 16000})
+audio_input.start_capture(callback)
+audio_input.simulate_audio_chunk(b'test_data')  # Test helper method
+```
+
+### Testing Guidelines
+
+See [Testing Guidelines](../testing_guidelines.md) for comprehensive testing patterns and examples.
+
 ## Implementation Guidelines
 
 1. **Interface Compliance**: All implementations must inherit from the abstract base classes
@@ -103,3 +128,4 @@ See individual interface documentation files for detailed usage examples:
 3. **Resource Management**: Always implement proper cleanup in `cleanup()` methods
 4. **Thread Safety**: Consider thread safety for interfaces used across threads
 5. **Configuration**: Use configuration dictionaries for flexible initialization
+6. **Testing**: Use centralized mocks for isolated unit testing
