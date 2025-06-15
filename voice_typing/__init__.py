@@ -1,14 +1,12 @@
 """
-Voice Typing package - Refactored classes for voice typing functionality.
+Voice Typing package - Modern interface-driven voice typing functionality.
 """
 
 from .config import Config
 from .configuration_loader import ConfigurationLoader
-from .global_state import GlobalState
 from .audio_processor import AudioProcessor
 from .tray_icon_manager import TrayIconManager
 from .hotkey_manager import HotkeyManager
-from .voice_typing_app import VoiceTyping
 from .pipeline_voice_typing import PipelineVoiceTyping
 from .recognition_sources import (
     VoiceRecognitionSource,
@@ -17,7 +15,7 @@ from .recognition_sources import (
     RecognitionSourceFactory,
 )
 
-# Export new interfaces for decoupling and modularity
+# Export interfaces for decoupling and modularity
 from .interfaces import (
     AudioInputSource,
     OutputActionTarget,
@@ -25,6 +23,7 @@ from .interfaces import (
     OutputDispatcher,
     KeyboardOutputActionTarget,
     StateManager,
+    BasicStateManager,
     VoiceTypingState,
     StateTransition,
 )
@@ -32,23 +31,22 @@ from .interfaces import (
 __all__ = [
     "Config",
     "ConfigurationLoader",
-    "GlobalState",
     "AudioProcessor",
     "TrayIconManager",
     "HotkeyManager",
-    "VoiceTyping",
     "PipelineVoiceTyping",
     "VoiceRecognitionSource",
     "VoskRecognitionSource",
     "WhisperRecognitionSource",
     "RecognitionSourceFactory",
-    # New interfaces
+    # Interfaces
     "AudioInputSource",
     "OutputActionTarget", 
     "OutputType",
     "OutputDispatcher",
     "KeyboardOutputActionTarget",
     "StateManager",
+    "BasicStateManager",
     "VoiceTypingState",
     "StateTransition",
 ]

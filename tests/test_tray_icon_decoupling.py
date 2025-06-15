@@ -82,36 +82,17 @@ def test_tray_icon_no_direct_state_access():
         print(f"Skipping test due to missing dependencies: {e}")
 
 
-def test_backward_compatibility():
-    """Test that legacy interface still works."""
-    try:
-        from voice_typing.tray_icon_manager import TrayIconManager
-        from voice_typing.global_state import GlobalState
-        
-        # Create TrayIconManager with legacy interface
-        state_ref = GlobalState()
-        tray_icon_manager = TrayIconManager(state_ref=state_ref)
-        
-        # Verify legacy access works
-        assert tray_icon_manager.state_ref is state_ref
-        
-        # The update_icon method should work without errors
-        tray_icon_manager.update_icon()  # Should not crash
-        
-        print("✓ Backward compatibility maintained")
-        
-    except ImportError as e:
-        print(f"Skipping test due to missing dependencies: {e}")
-
 
 def test_exit_callback_delegation():
     """Test that exit logic is delegated through callback."""
     try:
         from voice_typing.tray_icon_manager import TrayIconManager
+        from voice_typing.interfaces.state_manager import BasicStateManager
         
         # Create mock exit callback
         exit_callback = Mock()
-        tray_icon_manager = TrayIconManager(exit_callback=exit_callback)
+        state_manager = BasicStateManager()
+        tray_icon_manager = TrayIconManager(state_manager, exit_callback=exit_callback)
         
         # Mock icon
         mock_icon = Mock()
@@ -133,6 +114,5 @@ if __name__ == "__main__":
     test_tray_icon_subscribes_to_state_changes()
     test_tray_icon_reacts_to_state_events()
     test_tray_icon_no_direct_state_access()
-    test_backward_compatibility()
     test_exit_callback_delegation()
     print("All TrayIconManager decoupling tests passed!")

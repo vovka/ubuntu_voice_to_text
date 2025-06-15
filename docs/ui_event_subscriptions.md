@@ -70,28 +70,10 @@ The UI provides visual feedback based on state:
 
 The TrayIconManager follows these principles:
 
-1. **No Direct State Access**: Does not read state directly from GlobalState
+1. **No Direct State Access**: Does not read state directly from any state implementation
 2. **No State Mutation**: Does not modify application state
 3. **Event-Driven Updates**: Only updates UI in response to state change events
 4. **Business Logic Separation**: Delegates business logic (like exit) through callbacks
-
-### Backward Compatibility
-
-For gradual migration, the TrayIconManager supports both:
-
-- **New Event-Driven Mode**: When `state_manager` is provided
-- **Legacy Mode**: When only `state_ref` is provided (deprecated)
-
-```python
-# New approach (recommended)
-tray_icon_manager = TrayIconManager(
-    state_manager=state_manager,
-    exit_callback=handle_exit
-)
-
-# Legacy approach (deprecated)
-tray_icon_manager = TrayIconManager(state_ref=state_ref)
-```
 
 ## Exit Event Handling
 

@@ -2,7 +2,7 @@ import sys
 from typing import Optional
 
 from .config import Config
-from .global_state import GlobalState
+from .interfaces.state_manager import StateManager, VoiceTypingState
 from .recognition_sources import (
     VoiceRecognitionSource,
     RecognitionSourceFactory,
@@ -14,11 +14,11 @@ class AudioProcessor:
     def __init__(
         self,
         config: Config,
-        state_ref: GlobalState,
+        state_manager: StateManager,
         recognition_source: Optional[VoiceRecognitionSource] = None,
         output_dispatcher: Optional[OutputDispatcher] = None,
     ):
-        self.state_ref = state_ref
+        self.state_manager = state_manager
 
         # Use provided recognition source or create based on config
         if recognition_source is None:
@@ -70,10 +70,11 @@ class AudioProcessor:
         # Auto-disable after 5 seconds of inactivity (requirement: inactivity timeout)
         # IMPORTANT: Check timeout before getting result to ensure it runs even when no result is available
         current_time = time.time()
+        current_state = self.state_manager.get_current_state()
 
         # For 'listening' state: check if 5 seconds passed since last text OR start
         if (
-            self.state_ref.state == "listening"
+            current_state == VoiceTypingState.LISTENING
             and self.listening_started_at is not None
         ):
             time_since_last_activity = current_time - (
@@ -84,18 +85,18 @@ class AudioProcessor:
                     "[AudioProcessor] listening state: auto-disabling after "
                     "5 seconds of inactivity"
                 )
-                print("[StateManager] State transition: listening → idle (AudioProcessor auto-timeout)")
-                self.state_ref.state = "idle"
+                self.state_manager.set_state(VoiceTypingState.IDLE, 
+                                           metadata={'source': 'audio_processor_timeout'})
 
         # For 'finish_listening' state: existing timeout logic (manual stop flow)
         elif (
-            self.state_ref.state == "finish_listening"
+            current_state == VoiceTypingState.FINISH_LISTENING
             and self.last_text_at is not None
             and current_time - self.last_text_at > 5
         ):
             print("[AudioProcessor] finish_listening state: resetting to idle")
-            print("[StateManager] State transition: finish_listening → idle (AudioProcessor timeout)")
-            self.state_ref.state = "idle"
+            self.state_manager.set_state(VoiceTypingState.IDLE,
+                                       metadata={'source': 'audio_processor_finish_timeout'})
 
         result = self.recognition_source.get_result()
         if result is None:

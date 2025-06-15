@@ -65,7 +65,7 @@ config = Config(custom_config)
 ### Main Application
 
 ```python
-from voice_typing import ConfigurationLoader, Config, AudioProcessor, GlobalState
+from voice_typing import ConfigurationLoader, Config, AudioProcessor, BasicStateManager
 
 # Load configuration once at startup
 config_dict = ConfigurationLoader.load_configuration()
@@ -77,8 +77,8 @@ config_dict["sample_rate"] = 22050  # Custom sample rate
 config = Config(config_dict)
 
 # Pass to components
-state_ref = GlobalState()
-audio_processor = AudioProcessor(config, state_ref)
+state_manager = BasicStateManager()
+audio_processor = AudioProcessor(config, state_manager)
 ```
 
 ### Testing

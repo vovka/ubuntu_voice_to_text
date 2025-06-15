@@ -10,9 +10,10 @@ import time
 from unittest.mock import Mock, patch
 from voice_typing import (
     Config, 
-    GlobalState, 
     PipelineVoiceTyping,
     TrayIconManager,
+    BasicStateManager,
+    VoiceTypingState,
 )
 from voice_typing.recognition_sources import VoiceRecognitionSource
 
@@ -47,9 +48,9 @@ class MockRecognitionSource(VoiceRecognitionSource):
 
 
 def test_pipeline_voice_typing_initialization():
-    """Test that PipelineVoiceTyping can be initialized with existing components."""
+    """Test that PipelineVoiceTyping can be initialized with modern components."""
     config = Config()
-    state_ref = GlobalState()
+    state_manager = BasicStateManager()
     
     # Mock TrayIconManager to avoid GUI dependencies
     tray_manager = Mock(spec=TrayIconManager)
@@ -59,13 +60,13 @@ def test_pipeline_voice_typing_initialization():
     # Test initialization
     pipeline_voice_typing = PipelineVoiceTyping(
         config, 
-        state_ref, 
+        state_manager, 
         tray_manager,
         recognition_source=mock_recognition
     )
     
     assert pipeline_voice_typing.config == config
-    assert pipeline_voice_typing.state_ref == state_ref
+    assert pipeline_voice_typing.state_manager == state_manager
     assert pipeline_voice_typing.tray_icon_manager == tray_manager
     assert pipeline_voice_typing.recognition_source == mock_recognition
     assert pipeline_voice_typing.audio_input is not None
@@ -76,13 +77,13 @@ def test_pipeline_voice_typing_initialization():
 def test_pipeline_system_startup_shutdown():
     """Test that the pipeline system can start and stop cleanly."""
     config = Config()
-    state_ref = GlobalState()
+    state_manager = BasicStateManager()
     tray_manager = Mock(spec=TrayIconManager)
     mock_recognition = MockRecognitionSource()
     
     pipeline_voice_typing = PipelineVoiceTyping(
         config,
-        state_ref,
+        state_manager,
         tray_manager,
         recognition_source=mock_recognition
     )
@@ -109,13 +110,13 @@ def test_pipeline_system_startup_shutdown():
 def test_pipeline_state_integration():
     """Test that the pipeline responds to state changes."""
     config = Config()
-    state_ref = GlobalState()
+    state_manager = BasicStateManager()
     tray_manager = Mock(spec=TrayIconManager)
     mock_recognition = MockRecognitionSource()
     
     pipeline_voice_typing = PipelineVoiceTyping(
         config,
-        state_ref,
+        state_manager,
         tray_manager,
         recognition_source=mock_recognition
     )
@@ -132,11 +133,11 @@ def test_pipeline_state_integration():
         time.sleep(0.2)
         
         # Change state to listening
-        state_ref.state = "listening"
+        state_manager.set_state(VoiceTypingState.LISTENING)
         time.sleep(0.3)
         
         # Change state back to idle
-        state_ref.state = "idle"
+        state_manager.set_state(VoiceTypingState.IDLE)
         time.sleep(0.3)
         
         # Shutdown
@@ -145,29 +146,11 @@ def test_pipeline_state_integration():
     print("Pipeline state integration test passed")
 
 
-def test_backward_compatibility():
-    """Test that the new system maintains backward compatibility."""
-    config = Config()
-    state_ref = GlobalState()
-    tray_manager = Mock(spec=TrayIconManager)
-    
-    pipeline_voice_typing = PipelineVoiceTyping(config, state_ref, tray_manager)
-    
-    # Test that legacy methods exist
-    assert hasattr(pipeline_voice_typing, 'audio_callback')
-    
-    # The audio_callback should be callable but do nothing
-    pipeline_voice_typing.audio_callback(b'test', 100, None, None)
-    
-    print("Backward compatibility test passed")
-
-
 if __name__ == "__main__":
     print("Running pipeline integration tests...")
     
     test_pipeline_voice_typing_initialization()
     test_pipeline_system_startup_shutdown()
     test_pipeline_state_integration()
-    test_backward_compatibility()
     
     print("All pipeline integration tests passed!")

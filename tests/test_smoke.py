@@ -26,11 +26,11 @@ def test_main_module_imports():
         import voice_typing
 
         assert hasattr(voice_typing, "Config")
-        assert hasattr(voice_typing, "GlobalState")
         assert hasattr(voice_typing, "AudioProcessor")
+        assert hasattr(voice_typing, "PipelineVoiceTyping")
+        assert hasattr(voice_typing, "BasicStateManager")
         assert hasattr(voice_typing, "TrayIconManager")
         assert hasattr(voice_typing, "HotkeyManager")
-        assert hasattr(voice_typing, "VoiceTyping")
     except ImportError as e:
         # If import fails due to missing dependencies,
         # that's expected in CI environment
@@ -70,21 +70,4 @@ def test_config_class():
         pytest.skip(f"Skipping due to missing dependencies: {e}")
 
 
-def test_global_state_class():
-    """Test that the GlobalState class has expected attributes."""
-    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    sys.path.insert(0, project_root)
 
-    try:
-        from voice_typing import GlobalState
-
-        state = GlobalState()
-        assert hasattr(state, "q")
-        assert hasattr(state, "state")
-        assert hasattr(state, "icon")
-        assert hasattr(state, "current_keys")
-        assert state.state == "idle"
-    except ImportError as e:
-        import pytest
-
-        pytest.skip(f"Skipping due to missing dependencies: {e}")

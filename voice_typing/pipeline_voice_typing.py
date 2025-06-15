@@ -1,16 +1,15 @@
 """
 Pipeline-based Voice Typing implementation.
 
-This module provides a new VoiceTyping class that uses the decoupled
-audio pipeline architecture while maintaining compatibility with
-the existing system.
+This module provides a VoiceTyping class that uses the decoupled
+audio pipeline architecture with modern state management.
 """
 
 import asyncio
 import threading
 from typing import Optional, Dict, Any
 from .config import Config
-from .global_state import GlobalState
+from .interfaces.state_manager import StateManager, VoiceTypingState
 from .pipeline import AudioPipelineCoordinator, SoundDeviceAudioInput
 from .recognition_sources import RecognitionSourceFactory, VoiceRecognitionSource
 from .tray_icon_manager import TrayIconManager
@@ -21,20 +20,20 @@ class PipelineVoiceTyping:
     """
     Voice typing implementation using the decoupled audio pipeline.
     
-    This provides a bridge between the existing system and the new
-    pipeline architecture.
+    This provides the main voice typing functionality using the modern
+    pipeline architecture with interface-driven design.
     """
 
     def __init__(
         self,
         config: Config,
-        state_ref: GlobalState,
+        state_manager: StateManager,
         tray_icon_manager: TrayIconManager,
         recognition_source: Optional[VoiceRecognitionSource] = None,
         output_dispatcher: Optional[OutputDispatcher] = None,
     ):
         self.config = config
-        self.state_ref = state_ref
+        self.state_manager = state_manager
         self.tray_icon_manager = tray_icon_manager
         
         # Create audio input
@@ -126,9 +125,9 @@ class PipelineVoiceTyping:
         
         try:
             while self._running:
-                current_state = self.state_ref.state
+                current_state = self.state_manager.get_current_state()
                 
-                if current_state in ("listening", "finish_listening"):
+                if current_state in (VoiceTypingState.LISTENING, VoiceTypingState.FINISH_LISTENING):
                     if not self.pipeline_coordinator.is_pipeline_running():
                         print("[PipelineVoiceTyping] Starting pipeline for listening state")
                         await self.pipeline_coordinator.start_pipeline()
@@ -184,12 +183,9 @@ class PipelineVoiceTyping:
                 "Ctrl+Shift to start listening."
             )
             
-            # Main loop just monitors state and updates tray icon
+            # Main loop just waits - state management is handled by other components
             while True:
                 try:
-                    # Update tray icon
-                    self.tray_icon_manager.update_icon()
-                    
                     # Small delay to prevent busy waiting
                     import time
                     time.sleep(0.1)
@@ -203,10 +199,3 @@ class PipelineVoiceTyping:
         finally:
             print("[PipelineVoiceTyping] Shutting down pipeline system")
             self.stop_pipeline_system()
-
-    # Backward compatibility methods
-    def audio_callback(self, indata, frames, time, status):
-        """Legacy audio callback - not used in pipeline mode."""
-        # This method exists for backward compatibility but is not used
-        # in the pipeline-based implementation
-        pass
