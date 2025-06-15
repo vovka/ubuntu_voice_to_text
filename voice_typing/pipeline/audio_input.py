@@ -48,10 +48,10 @@ class SoundDeviceAudioInput(AudioInputSource):
             """Internal callback that converts data and calls user callback."""
             if status:
                 print(f"[SoundDeviceAudioInput] Audio callback status: {status}")
-            
+
             if self._callback:
                 # Convert numpy array to bytes
-                audio_bytes = indata.tobytes()
+                audio_bytes = bytes(indata)
                 self._callback(audio_bytes)
 
         try:
