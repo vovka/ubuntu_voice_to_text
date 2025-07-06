@@ -36,6 +36,7 @@ class ITrayControl(ABC):
         """Queue for commands or state updates directed to tray."""
         ...
 
+    @abstractmethod
     async def run(self) -> None:
         """
         Main async loop to process incoming messages from the input_queue.
@@ -55,6 +56,7 @@ class IKeyboardListener(ABC):
         """Queue for publishing detected hotkey events."""
         ...
 
+    @abstractmethod
     async def run(self) -> None:
         """
         Main async loop to listen for keyboard input and post events to output_queue.
@@ -80,6 +82,7 @@ class ISoundRecorder(ABC):
         """Queue for receiving control commands (start, stop, etc.)."""
         ...
 
+    @abstractmethod
     async def run(self) -> None:
         """
         Main async loop to process control commands and emit audio to audio_output_queue.
@@ -105,6 +108,7 @@ class INoiseCancelling(ABC):
         """Queue for sending processed audio."""
         ...
 
+    @abstractmethod
     async def run(self) -> None:
         """
         Main async loop to process audio from input_queue and send to output_queue.
@@ -130,6 +134,7 @@ class IVoiceRecognition(ABC):
         """Queue for sending out recognized text."""
         ...
 
+    @abstractmethod
     async def run(self) -> None:
         """
         Main async loop to process audio from input_queue and send recognized text to output_queue.
@@ -149,6 +154,7 @@ class IOutputHandler(ABC):
         """Queue for receiving recognized text."""
         ...
 
+    @abstractmethod
     async def run(self) -> None:
         """
         Main async loop to process recognized text and deliver it to the chosen output.
