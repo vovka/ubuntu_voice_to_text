@@ -1,4 +1,5 @@
 from dummy import *
+from voice_typing.keyboard_listener.linux_keyboard_listener import LinuxKeyboardListener
 import asyncio
 import logging
 
@@ -26,7 +27,7 @@ async def main():
     state_updates_queue = asyncio.Queue()  # shared_state -> tray_control
 
     # Create dummy units with shared queues
-    keyboard_listener = DummyKeyboardListener(
+    keyboard_listener = LinuxKeyboardListener(
         config={"hotkeys": ["ctrl+shift"]}, output_queue=hotkey_events_queue
     )
 

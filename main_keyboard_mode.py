@@ -5,6 +5,7 @@ react to. The app idles until hotkeys trigger actions, and remains alive until e
 """
 
 from dummy import *
+from voice_typing.keyboard_listener.linux_keyboard_listener import LinuxKeyboardListener
 import asyncio
 import logging
 
@@ -31,7 +32,7 @@ async def main():
     recognized_text_queue = asyncio.Queue()  # voice_recognition -> output_handler
 
     # Create units for keyboard mode (no tray control)
-    keyboard_listener = DummyKeyboardListener(
+    keyboard_listener = LinuxKeyboardListener(
         config={"hotkeys": ["ctrl+shift+r"]}, output_queue=hotkey_events_queue
     )
 

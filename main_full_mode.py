@@ -6,6 +6,7 @@ and output. Exiting is typically via the tray menu.
 """
 
 from dummy import *
+from voice_typing.keyboard_listener.linux_keyboard_listener import LinuxKeyboardListener
 import asyncio
 import logging
 
@@ -33,7 +34,7 @@ async def main():
     state_updates_queue = asyncio.Queue()  # shared_state -> tray_control
 
     # Create all units for full mode
-    keyboard_listener = DummyKeyboardListener(
+    keyboard_listener = LinuxKeyboardListener(
         config={"hotkeys": ["ctrl+shift+r", "ctrl+shift+q"]},
         output_queue=hotkey_events_queue,
     )
