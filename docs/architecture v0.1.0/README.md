@@ -35,6 +35,8 @@ At its heart, the app is a single, solid Python program, but it is built from mo
 7. **Noise Cancelling Unit (Optional)**
    To improve transcription quality, this unit can preprocess audio input, using configurable noise reduction techniques. Its presence is optional and pluggable.
 
+Planned interfaces are described in the `docs/architecture v0.1.0/draft interfaces.md`. Find diagrams in the `docs/architecture v0.1.0/images` directory.
+
 ---
 
 ## Scenarios: How the App Works
@@ -76,6 +78,15 @@ All these scenarios are also described in the `docs/architecture v0.1.0/scenario
 
 - **Docker-First:**
   The primary deployment target is Docker, ensuring reproducibility and ease of setup across environments.
+
+- **Queue-Based Communication:**
+  To ensure loose coupling, flexibility, and scalability, each unit communicates with others primarily through queues. These queues act as message channels, allowing data (such as audio chunks or recognized text) to flow asynchronously between units without requiring direct method calls or tight integration. This approach enables each unit to be developed, replaced, or scaled independently, and supports a variety of concurrency and parallelism strategies across different environments.
+
+---
+
+## Queue-Based Communication:
+
+To ensure loose coupling, flexibility, and scalability, each unit communicates with others primarily through queues. These queues act as message channels, allowing data (such as audio chunks or recognized text) to flow asynchronously between units without requiring direct method calls or tight integration. This approach enables each unit to be developed, replaced, or scaled independently, and supports a variety of concurrency and parallelism strategies across different environments.
 
 ---
 
