@@ -19,14 +19,14 @@ class DummySoundRecorder(ISoundRecorder):
     Dummy implementation of ISoundRecorder that logs activity and demonstrates queue interaction.
     """
     
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
-        """Initialize dummy sound recorder with optional configuration."""
+    def __init__(self, config: Optional[Dict[str, Any]] = None, audio_output_queue: Optional[QueueProtocol] = None, control_queue: Optional[QueueProtocol] = None):
+        """Initialize dummy sound recorder with optional configuration and external queues."""
         self._config = config or {}
-        self._audio_output_queue = asyncio.Queue()
-        self._control_queue = asyncio.Queue()
+        self._audio_output_queue = audio_output_queue if audio_output_queue else asyncio.Queue()
+        self._control_queue = control_queue if control_queue else asyncio.Queue()
         self._running = False
         self._recording = False
-        logger.info(f"DummySoundRecorder initialized with config: {self._config}")
+        logger.info(f"DummySoundRecorder initialized with config: {self._config}, using audio_output_queue: {id(self._audio_output_queue)}, control_queue: {id(self._control_queue)}")
     
     @property
     def audio_output_queue(self) -> QueueProtocol:

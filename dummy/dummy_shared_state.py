@@ -7,6 +7,7 @@ without real state management functionality.
 
 import asyncio
 import logging
+from typing import Optional
 from interfaces.shared_state import ISharedState
 from interfaces.queue_protocol import QueueProtocol
 
@@ -18,11 +19,11 @@ class DummySharedState(ISharedState):
     Dummy implementation of ISharedState that logs activity and demonstrates queue interaction.
     """
     
-    def __init__(self):
-        """Initialize dummy shared state with an async queue."""
-        self._state_queue = asyncio.Queue()
+    def __init__(self, state_queue: Optional[QueueProtocol] = None):
+        """Initialize dummy shared state with optional external queue."""
+        self._state_queue = state_queue if state_queue else asyncio.Queue()
         self._running = False
-        logger.info("DummySharedState initialized")
+        logger.info(f"DummySharedState initialized using state_queue: {id(self._state_queue)}")
     
     @property
     def state_queue(self) -> QueueProtocol:

@@ -19,12 +19,12 @@ class DummyOutputHandler(IOutputHandler):
     Dummy implementation of IOutputHandler that logs activity and demonstrates queue interaction.
     """
     
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
-        """Initialize dummy output handler with optional configuration."""
+    def __init__(self, config: Optional[Dict[str, Any]] = None, input_queue: Optional[QueueProtocol] = None):
+        """Initialize dummy output handler with optional configuration and external queue."""
         self._config = config or {}
-        self._input_queue = asyncio.Queue()
+        self._input_queue = input_queue if input_queue else asyncio.Queue()
         self._running = False
-        logger.info(f"DummyOutputHandler initialized with config: {self._config}")
+        logger.info(f"DummyOutputHandler initialized with config: {self._config}, using input_queue: {id(self._input_queue)}")
     
     @property
     def input_queue(self) -> QueueProtocol:

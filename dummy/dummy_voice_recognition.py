@@ -19,13 +19,13 @@ class DummyVoiceRecognition(IVoiceRecognition):
     Dummy implementation of IVoiceRecognition that logs activity and demonstrates queue interaction.
     """
     
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
-        """Initialize dummy voice recognition with optional configuration."""
+    def __init__(self, config: Optional[Dict[str, Any]] = None, audio_input_queue: Optional[QueueProtocol] = None, text_output_queue: Optional[QueueProtocol] = None):
+        """Initialize dummy voice recognition with optional configuration and external queues."""
         self._config = config or {}
-        self._audio_input_queue = asyncio.Queue()
-        self._text_output_queue = asyncio.Queue()
+        self._audio_input_queue = audio_input_queue if audio_input_queue else asyncio.Queue()
+        self._text_output_queue = text_output_queue if text_output_queue else asyncio.Queue()
         self._running = False
-        logger.info(f"DummyVoiceRecognition initialized with config: {self._config}")
+        logger.info(f"DummyVoiceRecognition initialized with config: {self._config}, using audio_input_queue: {id(self._audio_input_queue)}, text_output_queue: {id(self._text_output_queue)}")
     
     @property
     def audio_input_queue(self) -> QueueProtocol:

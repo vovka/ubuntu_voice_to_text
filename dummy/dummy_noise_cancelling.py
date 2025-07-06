@@ -19,13 +19,13 @@ class DummyNoiseCancelling(INoiseCancelling):
     Dummy implementation of INoiseCancelling that logs activity and demonstrates queue interaction.
     """
     
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
-        """Initialize dummy noise cancelling with optional configuration."""
+    def __init__(self, config: Optional[Dict[str, Any]] = None, audio_input_queue: Optional[QueueProtocol] = None, audio_output_queue: Optional[QueueProtocol] = None):
+        """Initialize dummy noise cancelling with optional configuration and external queues."""
         self._config = config or {}
-        self._audio_input_queue = asyncio.Queue()
-        self._audio_output_queue = asyncio.Queue()
+        self._audio_input_queue = audio_input_queue if audio_input_queue else asyncio.Queue()
+        self._audio_output_queue = audio_output_queue if audio_output_queue else asyncio.Queue()
         self._running = False
-        logger.info(f"DummyNoiseCancelling initialized with config: {self._config}")
+        logger.info(f"DummyNoiseCancelling initialized with config: {self._config}, using audio_input_queue: {id(self._audio_input_queue)}, audio_output_queue: {id(self._audio_output_queue)}")
     
     @property
     def audio_input_queue(self) -> QueueProtocol:
