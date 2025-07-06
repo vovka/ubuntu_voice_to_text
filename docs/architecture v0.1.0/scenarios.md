@@ -8,30 +8,26 @@ Below are PlantUML diagrams illustrating the architecture and module interaction
 
 ```plantuml
 @startuml
-title Voice-to-Text Transcriber: High-Level Architecture
+!theme blueprint
+title Voice-to-Text Transcriber: High-Level Architecture (Choreography)
 
 actor User
 
-User --> Orchestrator: Starts App
-
 package "Core Units" {
-  Orchestrator
-  SharedState
-  TrayControl
-  KeyboardListener
-  SoundRecorder
-  NoiseCancelling
-  VoiceRecognition
-  OutputHandler
+  component SharedState
+  component TrayControl
+  component KeyboardListener
+  component SoundRecorder
+  component NoiseCancelling
+  component VoiceRecognition
+  component OutputHandler
 }
 
-Orchestrator --> SharedState
-Orchestrator --> TrayControl
-Orchestrator --> KeyboardListener
-Orchestrator --> SoundRecorder
-Orchestrator --> NoiseCancelling
-Orchestrator --> VoiceRecognition
-Orchestrator --> OutputHandler
+User --> TrayControl: Interacts (e.g., starts app)
+User --> KeyboardListener: Interacts (e.g., hotkeys)
+
+TrayControl --> SharedState: updates state / sends commands
+KeyboardListener --> SharedState: updates state / sends commands
 
 TrayControl ..> SharedState : observes
 KeyboardListener ..> SharedState : observes
@@ -43,6 +39,12 @@ SoundRecorder --> NoiseCancelling: sends audio
 NoiseCancelling --> VoiceRecognition: sends clean audio
 VoiceRecognition --> OutputHandler: sends text
 
+' Explicit command flows from SharedState or other units to SoundRecorder
+SharedState --> SoundRecorder: commands (e.g., start/stop recording)
+
+' Explicit command flows from SharedState or other units to OutputHandler
+SharedState --> OutputHandler: commands (e.g., deliver text)
+
 @enduml
 ```
 
@@ -52,22 +54,24 @@ VoiceRecognition --> OutputHandler: sends text
 
 ```plantuml
 @startuml
+!theme blueprint
 title Scenario 1: Bare Mode (No Tray, No Keyboard)
 
 actor User
 
-User --> Orchestrator: Start
+User --> System: Start App (initializes units)
 
-Orchestrator --> SharedState: Set to "waiting"
-Orchestrator --> SoundRecorder: Activate
-SoundRecorder -> Orchestrator: Voice Detected
-Orchestrator --> SoundRecorder: Start Recording
+System --> SharedState: Set to "waiting"
+System --> SoundRecorder: Activate (via initial event/config)
+
+SoundRecorder -> SharedState: Voice Detected (updates state)
+SoundRecorder --> SoundRecorder: Start Recording (internal action based on state)
 SoundRecorder --> NoiseCancelling: (optional) Process audio
 NoiseCancelling --> VoiceRecognition: Send audio
-VoiceRecognition -> Orchestrator: Text Ready
-Orchestrator --> OutputHandler: Output text
-Orchestrator --> SharedState: Set to "exiting"
-Orchestrator -> User: Exit
+VoiceRecognition --> OutputHandler: Send text
+OutputHandler --> SharedState: Text Processed (updates state)
+SharedState --> System: Set to "exiting" (triggers app shutdown)
+System -> User: Exit
 
 @enduml
 ```
@@ -78,26 +82,24 @@ Orchestrator -> User: Exit
 
 ```plantuml
 @startuml
+!theme blueprint
 title Scenario 2: Tray Mode (Tray, No Keyboard)
 
 actor User
 
-User --> Orchestrator: Start
-Orchestrator --> TrayControl: Show Tray Icon (waiting)
-Orchestrator --> SharedState: Set to "waiting"
-Orchestrator --> SoundRecorder: Activate
+User --> TrayControl: Start App
+TrayControl --> SharedState: Set to "waiting"
+TrayControl --> SoundRecorder: Activate (via message to control queue)
 
-SoundRecorder -> Orchestrator: Voice Detected
-Orchestrator --> SharedState: Set to "recording"
-Orchestrator --> TrayControl: Update Icon (recording)
-Orchestrator --> SoundRecorder: Start Recording
-SoundRecorder --> NoiseCancelling: (optional) Process
+SoundRecorder -> SharedState: Voice Detected (updates state)
+SharedState --> TrayControl: Update Icon (recording)
+SoundRecorder --> SoundRecorder: Start Recording (internal action based on state)
+SoundRecorder --> NoiseCancelling: Send audio
 NoiseCancelling --> VoiceRecognition: Send audio
-VoiceRecognition -> Orchestrator: Text Ready
-Orchestrator --> OutputHandler: Output text
-Orchestrator --> TrayControl: Update Icon (done)
-Orchestrator --> SharedState: Set to "exiting"
-Orchestrator -> User: Exit
+VoiceRecognition --> OutputHandler: Send text
+OutputHandler --> TrayControl: Update Icon (done)
+SharedState --> SharedState: Set to "exiting" (internal state change)
+TrayControl --> User: Exit (via tray menu or internal logic)
 
 @enduml
 ```
@@ -107,31 +109,31 @@ Orchestrator -> User: Exit
 ## 4. Scenario 3: Keyboard Mode (Keyboard, No Tray)
 
 ```plantuml
-@startuml
+!theme blueprint
 title Scenario 3: Keyboard Mode (Keyboard, No Tray)
 
 actor User
 
-User --> Orchestrator: Start
-Orchestrator --> KeyboardListener: Listen for Hotkey
-Orchestrator --> SharedState: Set to "idle"
+User --> System: Start App (initializes units)
+System --> KeyboardListener: Activate (via initial event/config)
+System --> SharedState: Set to "idle"
 
-KeyboardListener -> Orchestrator: Hotkey Pressed (start)
-Orchestrator --> SharedState: Set to "listening"
-Orchestrator --> SoundRecorder: Activate
+KeyboardListener --> SharedState: Hotkey Pressed (start recording)
+SharedState --> SharedState: Set to "listening" (internal state change)
+SharedState --> SoundRecorder: Activate (via message to control queue)
 
-SoundRecorder -> Orchestrator: Voice Detected
-Orchestrator --> SoundRecorder: Start Recording
+SoundRecorder --> SharedState: Voice Detected (updates state)
+SoundRecorder --> SoundRecorder: Start Recording (internal action based on state)
 SoundRecorder --> NoiseCancelling: (optional) Process
 NoiseCancelling --> VoiceRecognition: Send audio
-VoiceRecognition -> Orchestrator: Text Ready
-Orchestrator --> OutputHandler: Output text
+VoiceRecognition --> OutputHandler: Send text
+OutputHandler --> SharedState: Text Processed (updates state)
 
-SoundRecorder -> Orchestrator: Silence Detected
-Orchestrator --> SharedState: Set to "idle"
-KeyboardListener -> Orchestrator: Hotkey Pressed (stop)
-Orchestrator --> SharedState: Set to "idle"
-User --> Orchestrator: Exit via external command
+SoundRecorder --> SharedState: Silence Detected (updates state)
+SharedState --> SharedState: Set to "idle" (internal state change)
+KeyboardListener --> SharedState: Hotkey Pressed (stop recording)
+SharedState --> SharedState: Set to "idle" (internal state change)
+User --> System: Exit App (external command)
 
 @enduml
 ```
@@ -141,41 +143,41 @@ User --> Orchestrator: Exit via external command
 ## 5. Scenario 4: Full Mode (Tray + Keyboard)
 
 ```plantuml
-@startuml
+!theme blueprint
 title Scenario 4: Full Mode (Tray + Keyboard)
 
 actor User
 
-User --> Orchestrator: Start
-Orchestrator --> TrayControl: Show Tray Icon (idle)
-Orchestrator --> KeyboardListener: Listen for Hotkey
-Orchestrator --> SharedState: Set to "idle"
+User --> System: Start App (initializes units)
+System --> TrayControl: Show Tray Icon (idle)
+System --> KeyboardListener: Activate (via initial event/config)
+System --> SharedState: Set to "idle"
 
-KeyboardListener -> Orchestrator: Hotkey Pressed (start)
-Orchestrator --> SharedState: Set to "listening"
-Orchestrator --> TrayControl: Update Icon (listening)
-Orchestrator --> SoundRecorder: Activate
+KeyboardListener --> SharedState: Hotkey Pressed (start recording)
+SharedState --> SharedState: Set to "listening" (internal state change)
+SharedState --> TrayControl: Update Icon (listening)
+SharedState --> SoundRecorder: Activate (via message to control queue)
 
-SoundRecorder -> Orchestrator: Voice Detected
-Orchestrator --> SharedState: Set to "recording"
-Orchestrator --> TrayControl: Update Icon (recording)
-Orchestrator --> SoundRecorder: Start Recording
+SoundRecorder --> SharedState: Voice Detected (updates state)
+SharedState --> SharedState: Set to "recording" (internal state change)
+SharedState --> TrayControl: Update Icon (recording)
+SoundRecorder --> SoundRecorder: Start Recording (internal action based on state)
 SoundRecorder --> NoiseCancelling: (optional) Process
 NoiseCancelling --> VoiceRecognition: Send audio
-VoiceRecognition -> Orchestrator: Text Ready
-Orchestrator --> OutputHandler: Output text
-Orchestrator --> TrayControl: Update Icon (done)
-Orchestrator --> SharedState: Set to "idle"
-Orchestrator --> TrayControl: Update Icon (idle)
+VoiceRecognition --> OutputHandler: Send text
+OutputHandler --> SharedState: Text Processed (updates state)
+SharedState --> TrayControl: Update Icon (done)
+SharedState --> SharedState: Set to "idle" (internal state change)
+SharedState --> TrayControl: Update Icon (idle)
 
-KeyboardListener -> Orchestrator: Hotkey Pressed (stop)
-Orchestrator --> SharedState: Set to "idle"
-Orchestrator --> TrayControl: Update Icon (idle)
+KeyboardListener --> SharedState: Hotkey Pressed (stop recording)
+SharedState --> SharedState: Set to "idle" (internal state change)
+SharedState --> TrayControl: Update Icon (idle)
 
 User -> TrayControl: Exit via Tray Menu
-TrayControl -> Orchestrator: Exit Command
-Orchestrator --> SharedState: Set to "exiting"
-Orchestrator -> User: Exit
+TrayControl --> SharedState: Exit Command
+SharedState --> SharedState: Set to "exiting" (internal state change)
+System -> User: Exit App
 
 @enduml
 ```
@@ -185,12 +187,8 @@ Orchestrator -> User: Exit
 ## 6. Unit Replacement/Extensibility Overview
 
 ```plantuml
-@startuml
+!theme blueprint
 title Extensibility: How Units are Swappable
-
-package "Orchestrator" {
-  class Orchestrator
-}
 
 package "Units" {
   interface ITrayControl
@@ -210,25 +208,28 @@ package "Units" {
   interface IVoiceRecognition
   class VoskEngine
   class WhisperAPI
+
+  interface IOutputHandler
+  class ActiveWindowOutput
+  class ClipboardOutput
 }
 
-Orchestrator --> ITrayControl
 ITrayControl <|.. GnomeTray
 ITrayControl <|.. WinTray
 ITrayControl <|.. MacTray
 
-Orchestrator --> IKeyboardListener
 IKeyboardListener <|.. LinuxKeyboard
 IKeyboardListener <|.. WinKeyboard
 IKeyboardListener <|.. MacKeyboard
 
-Orchestrator --> ISoundRecorder
 ISoundRecorder <|.. PyAudioRecorder
 ISoundRecorder <|.. WasapiRecorder
 
-Orchestrator --> IVoiceRecognition
 IVoiceRecognition <|.. VoskEngine
 IVoiceRecognition <|.. WhisperAPI
+
+IOutputHandler <|.. ActiveWindowOutput
+IOutputHandler <|.. ClipboardOutput
 
 @enduml
 ```

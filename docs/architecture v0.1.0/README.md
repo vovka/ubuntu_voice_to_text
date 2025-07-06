@@ -8,9 +8,9 @@ This is the story of building such a system, from a desire for simplicity and re
 
 ---
 
-## Architecture: Units and Orchestration
+## Architecture: Units and Event-Driven Communication
 
-At its heart, the app is a single, solid Python program, but it is built from modular, independent parts — "units" — each handling a distinct concern. These units are orchestrated by a central controller, which binds them together and manages their interactions.
+At its heart, the app is a single, solid Python program, built from modular, independent "units," each handling a distinct concern. These units communicate primarily through asynchronous queues, reacting to events and messages from other units to achieve the application's overall functionality. This design emphasizes loose coupling and decentralized control.
 
 ### The Units
 
@@ -24,7 +24,7 @@ At its heart, the app is a single, solid Python program, but it is built from mo
    Also optional. This unit listens for global hotkeys to control the app: start listening, stop, pause, resume. Like the tray, it’s designed to be swappable for different OS needs.
 
 4. **Sound Recorder Unit**
-   This unit captures audio from the system microphone when the app is in the appropriate state. It is sensitive to transitions — it starts and stops recording as the orchestrator commands. The implementation abstracts over audio backends to allow for cross-platform support.
+   This unit captures audio from the system microphone when the app is in the appropriate state. It is sensitive to transitions — it starts and stops recording based on messages received on its control queue. The implementation abstracts over audio backends to allow for cross-platform support.
 
 5. **Voice Recognition Unit**
    The core of the app. Given audio, it converts speech to text. The first supported engines are Vosk (offline) and OpenAI Whisper API (online), but the architecture allows for easy extension with other engines in the future.
@@ -41,21 +41,21 @@ Planned interfaces are described in the `docs/architecture v0.1.0/draft interfac
 
 ## Scenarios: How the App Works
 
-The app can run in several modes, each defined by which units are active:
+The app can run in several modes, each defined by which units are active and how they interact through queues:
 
 1. **Bare Mode**
-   No tray, no keyboard. The app starts, listens for speech, records when voice is detected, transcribes, outputs the result, then exits.
+   No tray, no keyboard. The app starts, units are initialized, and they react to internal events (e.g., voice detection) to record, transcribe, and output, then the application exits.
 
 2. **Tray Mode**
-   Tray enabled, keyboard disabled. The tray icon shows the app’s state. Otherwise works as bare mode.
+   Tray enabled, keyboard disabled. The tray icon reflects the app’s state, updated by messages from the Shared State unit. Otherwise, it operates similarly to bare mode, with units reacting to events.
 
 3. **Keyboard Mode**
-   Keyboard enabled, tray disabled. The app waits for a hotkey to start listening. It records and transcribes on voice input, outputs, then idles. Hotkeys can toggle listening/idle, and the app stays alive until explicitly exited.
+   Keyboard enabled, tray disabled. The Keyboard Listener unit waits for hotkeys, publishing events that other units (like Sound Recorder) react to. The app idles until hotkeys trigger actions, and remains alive until explicitly exited.
 
 4. **Full Mode**
-   Both tray and keyboard enabled. Tray icon reflects state (with colors/animations), keyboard controls recording. Exiting is only via tray menu.
+   Both tray and keyboard enabled. The Tray Control unit reflects state changes, and the Keyboard Listener unit publishes events, with other units reacting to these events to manage recording, transcription, and output. Exiting is typically via the tray menu.
 
-All these scenarios are also described in the `docs/architecture v0.1.0/scenarios.md` and images can be found in the `docs/architecture v0.1.0/images` directory.
+All these scenarios are also described in the `docs/architecture v0.1.0/scenarios.md` and images can be found in the `docs/architecture v0.1.0/images` directory. Note that the PlantUML diagrams in `scenarios.md` conceptually illustrate the flow, and while they may depict an "Orchestrator" for clarity of sequence, the underlying implementation relies on the event-driven, queue-based communication described herein.
 
 ---
 
@@ -169,4 +169,4 @@ The user launches the app (usually via Docker). Depending on configuration, they
 
 ## Conclusion
 
-By focusing on modularity, testability, and cross-platform support — and by learning from past complexity — this project aims to be the most elegant, reliable, and adaptable voice-to-text transcriber for desktop users. Its architecture is simple, but its flexibility and power come from the thoughtful composition of independent units, orchestrated to work together in perfect harmony.
+By focusing on modularity, testability, and cross-platform support — and by learning from past complexity — this project aims to be the most elegant, reliable, and adaptable voice-to-text transcriber for desktop users. Its architecture is simple, but its flexibility and power come from the thoughtful composition of independent units, communicating through event-driven, queue-based interactions to work together in perfect harmony.
