@@ -15,8 +15,8 @@ class ISoundRecorder(ABC):
     Interface for the sound recorder unit.
     """
     
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
-        """Initialize the sound recorder unit with optional configuration."""
+    def __init__(self, config: Optional[Dict[str, Any]] = None, audio_output_queue: Optional[QueueProtocol] = None, control_queue: Optional[QueueProtocol] = None):
+        """Initialize the sound recorder unit with optional configuration and external queues."""
         ...
     
     @property

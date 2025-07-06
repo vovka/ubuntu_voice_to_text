@@ -15,8 +15,8 @@ class INoiseCancelling(ABC):
     Interface for the noise cancelling/preprocessing unit.
     """
     
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
-        """Initialize the noise cancelling unit with optional configuration."""
+    def __init__(self, config: Optional[Dict[str, Any]] = None, audio_input_queue: Optional[QueueProtocol] = None, audio_output_queue: Optional[QueueProtocol] = None):
+        """Initialize the noise cancelling unit with optional configuration and external queues."""
         ...
     
     @property

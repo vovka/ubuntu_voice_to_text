@@ -15,8 +15,8 @@ class IKeyboardListener(ABC):
     Interface for the keyboard hotkey listener unit.
     """
     
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
-        """Initialize the keyboard listener unit with optional configuration."""
+    def __init__(self, config: Optional[Dict[str, Any]] = None, output_queue: Optional[QueueProtocol] = None):
+        """Initialize the keyboard listener unit with optional configuration and external queue."""
         ...
     
     @property

@@ -15,8 +15,8 @@ class IOutputHandler(ABC):
     Interface for the output handler unit (clipboard, active window, file, etc.).
     """
     
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
-        """Initialize the output handler unit with optional configuration."""
+    def __init__(self, config: Optional[Dict[str, Any]] = None, input_queue: Optional[QueueProtocol] = None):
+        """Initialize the output handler unit with optional configuration and external queue."""
         ...
     
     @property

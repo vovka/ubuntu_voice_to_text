@@ -15,8 +15,8 @@ class IVoiceRecognition(ABC):
     Interface for the voice/speech recognition unit.
     """
     
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
-        """Initialize the voice recognition unit with optional configuration."""
+    def __init__(self, config: Optional[Dict[str, Any]] = None, audio_input_queue: Optional[QueueProtocol] = None, text_output_queue: Optional[QueueProtocol] = None):
+        """Initialize the voice recognition unit with optional configuration and external queues."""
         ...
     
     @property
