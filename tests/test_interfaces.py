@@ -29,7 +29,7 @@ class TestInterfaces:
         """Test that QueueProtocol is a Protocol."""
         from typing import Protocol
         # QueueProtocol should be a Protocol
-        assert hasattr(QueueProtocol, '__annotations__')
+        assert issubclass(QueueProtocol, Protocol)
 
     def test_shared_state_interface_is_abstract(self):
         """Test that ISharedState is an abstract base class."""
