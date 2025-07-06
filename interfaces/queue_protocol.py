@@ -13,11 +13,11 @@ class QueueProtocol(Protocol):
     A generic queue protocol for async communication between units.
     Implementations must provide async put() and get() methods.
     """
-    
+
     async def put(self, item: Any) -> None:
         """Put an item into the queue."""
         ...
-    
+
     async def get(self) -> Any:
         """Get an item from the queue."""
         ...

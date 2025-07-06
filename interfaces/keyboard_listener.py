@@ -14,17 +14,21 @@ class IKeyboardListener(ABC):
     """
     Interface for the keyboard hotkey listener unit.
     """
-    
-    def __init__(self, config: Optional[Dict[str, Any]] = None, output_queue: Optional[QueueProtocol] = None):
+
+    def __init__(
+        self,
+        config: Optional[Dict[str, Any]] = None,
+        output_queue: Optional[QueueProtocol] = None,
+    ):
         """Initialize the keyboard listener unit with optional configuration and external queue."""
         ...
-    
+
     @property
     @abstractmethod
     def output_queue(self) -> QueueProtocol:
         """Queue for publishing detected hotkey events."""
         ...
-    
+
     @abstractmethod
     async def run(self) -> None:
         """

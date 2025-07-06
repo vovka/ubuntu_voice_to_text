@@ -14,23 +14,28 @@ class INoiseCancelling(ABC):
     """
     Interface for the noise cancelling/preprocessing unit.
     """
-    
-    def __init__(self, config: Optional[Dict[str, Any]] = None, audio_input_queue: Optional[QueueProtocol] = None, audio_output_queue: Optional[QueueProtocol] = None):
+
+    def __init__(
+        self,
+        config: Optional[Dict[str, Any]] = None,
+        audio_input_queue: Optional[QueueProtocol] = None,
+        audio_output_queue: Optional[QueueProtocol] = None,
+    ):
         """Initialize the noise cancelling unit with optional configuration and external queues."""
         ...
-    
+
     @property
     @abstractmethod
     def audio_input_queue(self) -> QueueProtocol:
         """Queue for receiving raw audio."""
         ...
-    
+
     @property
     @abstractmethod
     def audio_output_queue(self) -> QueueProtocol:
         """Queue for sending processed audio."""
         ...
-    
+
     @abstractmethod
     async def run(self) -> None:
         """

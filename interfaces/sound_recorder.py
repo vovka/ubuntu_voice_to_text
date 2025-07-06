@@ -14,23 +14,28 @@ class ISoundRecorder(ABC):
     """
     Interface for the sound recorder unit.
     """
-    
-    def __init__(self, config: Optional[Dict[str, Any]] = None, audio_output_queue: Optional[QueueProtocol] = None, control_queue: Optional[QueueProtocol] = None):
+
+    def __init__(
+        self,
+        config: Optional[Dict[str, Any]] = None,
+        audio_output_queue: Optional[QueueProtocol] = None,
+        control_queue: Optional[QueueProtocol] = None,
+    ):
         """Initialize the sound recorder unit with optional configuration and external queues."""
         ...
-    
+
     @property
     @abstractmethod
     def audio_output_queue(self) -> QueueProtocol:
         """Queue for sending audio chunks or streams."""
         ...
-    
+
     @property
     @abstractmethod
     def control_queue(self) -> QueueProtocol:
         """Queue for receiving control commands (start, stop, etc.)."""
         ...
-    
+
     @abstractmethod
     async def run(self) -> None:
         """

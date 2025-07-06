@@ -14,17 +14,21 @@ class ITrayControl(ABC):
     """
     Interface for the tray icon/control unit.
     """
-    
-    def __init__(self, config: Optional[Dict[str, Any]] = None, input_queue: Optional[QueueProtocol] = None):
+
+    def __init__(
+        self,
+        config: Optional[Dict[str, Any]] = None,
+        input_queue: Optional[QueueProtocol] = None,
+    ):
         """Initialize the tray control unit with optional configuration and external queue."""
         ...
-    
+
     @property
     @abstractmethod
     def input_queue(self) -> QueueProtocol:
         """Queue for commands or state updates directed to tray."""
         ...
-    
+
     @abstractmethod
     async def run(self) -> None:
         """
