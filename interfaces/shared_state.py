@@ -15,17 +15,17 @@ class ISharedState(ABC):
     Interface for a shared state unit.
     Typically used for propagating and observing global state changes.
     """
-    
+
     def __init__(self, state_queue: Optional[QueueProtocol] = None):
         """Initialize the shared state unit with optional external queue."""
         ...
-    
+
     @property
     @abstractmethod
     def state_queue(self) -> QueueProtocol:
         """A queue for state change events/messages."""
         ...
-    
+
     @abstractmethod
     async def run(self) -> None:
         """
