@@ -1,358 +1,168 @@
 """
-Tests for the new module interfaces.
+Unit tests for interface definitions of the voice-to-text transcriber.
 
-This validates that the interfaces are properly defined and 
-can be implemented correctly.
+These tests validate that the interfaces are properly defined and
+can be used for type checking and inheritance.
 """
 
+import asyncio
 import pytest
-import sys
-import os
-from typing import Dict, Any, Optional, Callable
+from abc import ABC
 
-# Add the project root to the path
-project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.insert(0, project_root)
-
-
-def test_interfaces_can_be_imported():
-    """Test that all new interfaces can be imported."""
-    try:
-        from voice_typing.interfaces import (
-            AudioInputSource,
-            OutputActionTarget,
-            StateManager,
-            VoiceRecognitionSource,
-        )
-        
-        # Test that they are abstract base classes
-        assert hasattr(AudioInputSource, '__abstractmethods__')
-        assert hasattr(OutputActionTarget, '__abstractmethods__')
-        assert hasattr(StateManager, '__abstractmethods__')
-        assert hasattr(VoiceRecognitionSource, '__abstractmethods__')
-        
-        print("All interfaces imported successfully")
-        
-    except ImportError as e:
-        pytest.skip(f"Skipping due to missing dependencies: {e}")
+# Import interfaces
+from interfaces import (
+    QueueProtocol,
+    ISharedState,
+    ITrayControl,
+    IKeyboardListener,
+    ISoundRecorder,
+    INoiseCancelling,
+    IVoiceRecognition,
+    IOutputHandler,
+)
 
 
-def test_audio_input_interface():
-    """Test AudioInputSource interface definition."""
-    try:
-        from voice_typing.interfaces import AudioInputSource
-        
-        # Check that all required methods are abstract
-        expected_methods = {
-            'initialize',
-            'start_capture', 
-            'stop_capture',
-            'is_capturing',
-            'is_available',
-            'cleanup',
-            'get_device_info'
-        }
-        
-        abstract_methods = AudioInputSource.__abstractmethods__
-        assert expected_methods.issubset(abstract_methods)
-        
-        print("AudioInputSource interface properly defined")
-        
-    except ImportError as e:
-        pytest.skip(f"Skipping due to missing dependencies: {e}")
+class TestInterfaces:
+    """Test suite for interface definitions."""
+
+    def test_queue_protocol_is_protocol(self):
+        """Test that QueueProtocol is a Protocol."""
+        from typing import Protocol
+
+        # QueueProtocol should be a Protocol
+        assert issubclass(QueueProtocol, Protocol)
+
+    def test_shared_state_interface_is_abstract(self):
+        """Test that ISharedState is an abstract base class."""
+        assert issubclass(ISharedState, ABC)
+
+        # Should not be instantiable directly
+        with pytest.raises(TypeError):
+            ISharedState()
+
+    def test_tray_control_interface_is_abstract(self):
+        """Test that ITrayControl is an abstract base class."""
+        assert issubclass(ITrayControl, ABC)
+
+        # Should not be instantiable directly
+        with pytest.raises(TypeError):
+            ITrayControl()
+
+    def test_keyboard_listener_interface_is_abstract(self):
+        """Test that IKeyboardListener is an abstract base class."""
+        assert issubclass(IKeyboardListener, ABC)
+
+        # Should not be instantiable directly
+        with pytest.raises(TypeError):
+            IKeyboardListener()
+
+    def test_sound_recorder_interface_is_abstract(self):
+        """Test that ISoundRecorder is an abstract base class."""
+        assert issubclass(ISoundRecorder, ABC)
+
+        # Should not be instantiable directly
+        with pytest.raises(TypeError):
+            ISoundRecorder()
+
+    def test_noise_cancelling_interface_is_abstract(self):
+        """Test that INoiseCancelling is an abstract base class."""
+        assert issubclass(INoiseCancelling, ABC)
+
+        # Should not be instantiable directly
+        with pytest.raises(TypeError):
+            INoiseCancelling()
+
+    def test_voice_recognition_interface_is_abstract(self):
+        """Test that IVoiceRecognition is an abstract base class."""
+        assert issubclass(IVoiceRecognition, ABC)
+
+        # Should not be instantiable directly
+        with pytest.raises(TypeError):
+            IVoiceRecognition()
+
+    def test_output_handler_interface_is_abstract(self):
+        """Test that IOutputHandler is an abstract base class."""
+        assert issubclass(IOutputHandler, ABC)
+
+        # Should not be instantiable directly
+        with pytest.raises(TypeError):
+            IOutputHandler()
+
+    def test_asyncio_queue_satisfies_queue_protocol(self):
+        """Test that asyncio.Queue satisfies QueueProtocol."""
+        queue = asyncio.Queue()
+
+        # Check that it has the required methods
+        assert hasattr(queue, "put")
+        assert hasattr(queue, "get")
+        assert callable(queue.put)
+        assert callable(queue.get)
+
+    @pytest.mark.asyncio
+    async def test_asyncio_queue_protocol_methods(self):
+        """Test that asyncio.Queue methods work as expected for QueueProtocol."""
+        queue = asyncio.Queue()
+
+        # Test put and get
+        test_item = "test_item"
+        await queue.put(test_item)
+        retrieved_item = await queue.get()
+        assert retrieved_item == test_item
+
+    def test_all_interfaces_have_run_method(self):
+        """Test that all interfaces define a run method."""
+        interfaces_with_run = [
+            ISharedState,
+            ITrayControl,
+            IKeyboardListener,
+            ISoundRecorder,
+            INoiseCancelling,
+            IVoiceRecognition,
+            IOutputHandler,
+        ]
+
+        for interface in interfaces_with_run:
+            # Check that the interface has a run method defined
+            assert hasattr(interface, "run")
+            # Check that it's marked as abstract
+            assert "run" in interface.__abstractmethods__
+
+    def test_interfaces_have_queue_properties(self):
+        """Test that interfaces have the expected queue properties."""
+        # ISharedState should have state_queue
+        assert hasattr(ISharedState, "state_queue")
+        assert "state_queue" in ISharedState.__abstractmethods__
+
+        # ITrayControl should have input_queue
+        assert hasattr(ITrayControl, "input_queue")
+        assert "input_queue" in ITrayControl.__abstractmethods__
+
+        # IKeyboardListener should have output_queue
+        assert hasattr(IKeyboardListener, "output_queue")
+        assert "output_queue" in IKeyboardListener.__abstractmethods__
+
+        # ISoundRecorder should have both audio_output_queue and control_queue
+        assert hasattr(ISoundRecorder, "audio_output_queue")
+        assert hasattr(ISoundRecorder, "control_queue")
+        assert "audio_output_queue" in ISoundRecorder.__abstractmethods__
+        assert "control_queue" in ISoundRecorder.__abstractmethods__
+
+        # INoiseCancelling should have both audio_input_queue and audio_output_queue
+        assert hasattr(INoiseCancelling, "audio_input_queue")
+        assert hasattr(INoiseCancelling, "audio_output_queue")
+        assert "audio_input_queue" in INoiseCancelling.__abstractmethods__
+        assert "audio_output_queue" in INoiseCancelling.__abstractmethods__
+
+        # IVoiceRecognition should have both audio_input_queue and text_output_queue
+        assert hasattr(IVoiceRecognition, "audio_input_queue")
+        assert hasattr(IVoiceRecognition, "text_output_queue")
+        assert "audio_input_queue" in IVoiceRecognition.__abstractmethods__
+        assert "text_output_queue" in IVoiceRecognition.__abstractmethods__
+
+        # IOutputHandler should have input_queue
+        assert hasattr(IOutputHandler, "input_queue")
+        assert "input_queue" in IOutputHandler.__abstractmethods__
 
 
-def test_output_action_interface():
-    """Test OutputActionTarget interface definition."""
-    try:
-        from voice_typing.interfaces import OutputActionTarget, OutputType
-        
-        # Check that OutputType enum exists
-        assert hasattr(OutputType, 'KEYBOARD')
-        assert hasattr(OutputType, 'CLIPBOARD')
-        assert hasattr(OutputType, 'FILE')
-        assert hasattr(OutputType, 'CALLBACK')
-        
-        # Check that all required methods are abstract
-        expected_methods = {
-            'initialize',
-            'deliver_text',
-            'is_available', 
-            'get_output_type',
-            'supports_formatting',
-            'cleanup'
-        }
-        
-        abstract_methods = OutputActionTarget.__abstractmethods__
-        assert expected_methods.issubset(abstract_methods)
-        
-        print("OutputActionTarget interface properly defined")
-        
-    except ImportError as e:
-        pytest.skip(f"Skipping due to missing dependencies: {e}")
-
-
-def test_state_manager_interface():
-    """Test StateManager interface definition."""
-    try:
-        from voice_typing.interfaces.state_manager import (
-            StateManager,
-            VoiceTypingState,
-            StateTransition
-        )
-        
-        # Check that VoiceTypingState enum exists
-        assert hasattr(VoiceTypingState, 'IDLE')
-        assert hasattr(VoiceTypingState, 'LISTENING')
-        assert hasattr(VoiceTypingState, 'FINISH_LISTENING')
-        assert hasattr(VoiceTypingState, 'PROCESSING')
-        assert hasattr(VoiceTypingState, 'ERROR')
-        
-        # Check StateTransition class
-        transition = StateTransition(VoiceTypingState.IDLE, VoiceTypingState.LISTENING)
-        assert transition.from_state == VoiceTypingState.IDLE
-        assert transition.to_state == VoiceTypingState.LISTENING
-        assert hasattr(transition, 'timestamp')
-        assert hasattr(transition, 'metadata')
-        
-        # Check that all required methods are abstract
-        expected_methods = {
-            'get_current_state',
-            'set_state',
-            'can_transition_to',
-            'register_state_listener',
-            'unregister_state_listener',
-            'get_state_history',
-            'get_state_metadata',
-            'reset_state'
-        }
-        
-        abstract_methods = StateManager.__abstractmethods__
-        assert expected_methods.issubset(abstract_methods)
-        
-        print("StateManager interface properly defined")
-        
-    except ImportError as e:
-        pytest.skip(f"Skipping due to missing dependencies: {e}")
-
-
-def test_mock_audio_input_implementation():
-    """Test that AudioInputSource can be implemented using centralized mock."""
-    try:
-        from voice_typing.testing import MockAudioInputSource
-        
-        # Test implementation
-        audio_input = MockAudioInputSource()
-        
-        # Test initialization
-        config = {'sample_rate': 16000}
-        assert audio_input.initialize(config) == True
-        assert audio_input.is_available() == True
-        
-        # Test capture
-        received_chunks = []
-        def callback(chunk: bytes):
-            received_chunks.append(chunk)
-        
-        assert audio_input.start_capture(callback) == True
-        assert audio_input.is_capturing() == True
-        
-        # Simulate receiving audio chunk
-        audio_input.simulate_audio_chunk(b'test_audio_data')
-        
-        assert len(received_chunks) == 1
-        assert received_chunks[0] == b'test_audio_data'
-        
-        # Test stop and cleanup
-        audio_input.stop_capture()
-        assert audio_input.is_capturing() == False
-        
-        audio_input.cleanup()
-        
-        print("Mock AudioInputSource implementation works correctly")
-        
-    except ImportError as e:
-        pytest.skip(f"Skipping due to missing dependencies: {e}")
-
-
-def test_mock_output_action_implementation():
-    """Test that OutputActionTarget can be implemented using centralized mock."""
-    try:
-        from voice_typing.testing import MockOutputActionTarget
-        from voice_typing.interfaces import OutputType
-        
-        # Test implementation
-        output_target = MockOutputActionTarget()
-        
-        # Test initialization
-        config = {}
-        assert output_target.initialize(config) == True
-        assert output_target.is_available() == True
-        assert output_target.get_output_type() == OutputType.CALLBACK
-        assert output_target.supports_formatting() == False
-        
-        # Test text delivery
-        metadata = {'confidence': 0.95}
-        assert output_target.deliver_text("hello world", metadata) == True
-        
-        delivered_texts = output_target.get_delivered_texts()
-        assert len(delivered_texts) == 1
-        text, meta = delivered_texts[0]
-        assert text == "hello world"
-        assert meta == metadata
-        
-        # Test cleanup
-        output_target.cleanup()
-        assert len(output_target.get_delivered_texts()) == 0
-        
-        print("Mock OutputActionTarget implementation works correctly")
-        
-    except ImportError as e:
-        pytest.skip(f"Skipping due to missing dependencies: {e}")
-
-
-def test_basic_state_manager_implementation():
-    """Test BasicStateManager implementation."""
-    try:
-        from voice_typing.interfaces.state_manager import BasicStateManager, VoiceTypingState, StateTransition
-        
-        # Create state manager
-        state_manager = BasicStateManager()
-        
-        # Test initial state
-        assert state_manager.get_current_state() == VoiceTypingState.IDLE
-        
-        # Test valid transition
-        success = state_manager.set_state(VoiceTypingState.LISTENING)
-        assert success == True
-        assert state_manager.get_current_state() == VoiceTypingState.LISTENING
-        
-        # Test invalid transition
-        success = state_manager.set_state(VoiceTypingState.PROCESSING)  # LISTENING -> PROCESSING is invalid
-        assert success == False
-        assert state_manager.get_current_state() == VoiceTypingState.LISTENING  # Should not change
-        
-        # Test state listeners
-        received_transitions = []
-        def listener(transition: StateTransition):
-            received_transitions.append(transition)
-        
-        state_manager.register_state_listener(listener)
-        
-        # Make a transition
-        metadata = {'test': 'data'}
-        state_manager.set_state(VoiceTypingState.FINISH_LISTENING, metadata)
-        
-        # Check listener was called
-        assert len(received_transitions) == 1
-        transition = received_transitions[0]
-        assert transition.from_state == VoiceTypingState.LISTENING
-        assert transition.to_state == VoiceTypingState.FINISH_LISTENING
-        assert transition.metadata == metadata
-        
-        # Test history
-        history = state_manager.get_state_history()
-        assert len(history) >= 2  # At least 2 transitions occurred
-        
-        # Test reset
-        state_manager.reset_state()
-        assert state_manager.get_current_state() == VoiceTypingState.IDLE
-        
-        print("BasicStateManager implementation works correctly")
-        
-    except ImportError as e:
-        pytest.skip(f"Skipping due to missing dependencies: {e}")
-
-
-def test_callback_output_target():
-    """Test CallbackOutputActionTarget implementation."""
-    try:
-        from voice_typing.interfaces.output_action import CallbackOutputActionTarget
-        
-        # Test callback target
-        received_calls = []
-        def test_callback(text: str, metadata: Optional[Dict[str, Any]]):
-            received_calls.append((text, metadata))
-        
-        callback_target = CallbackOutputActionTarget()
-        config = {'callback': test_callback}
-        
-        assert callback_target.initialize(config) == True
-        assert callback_target.is_available() == True
-        
-        # Test text delivery
-        metadata = {'confidence': 0.8}
-        assert callback_target.deliver_text("test message", metadata) == True
-        
-        # Check callback was called
-        assert len(received_calls) == 1
-        text, meta = received_calls[0]
-        assert text == "test message" 
-        assert meta == metadata
-        
-        print("CallbackOutputActionTarget works correctly")
-        
-    except ImportError as e:
-        pytest.skip(f"Skipping due to missing dependencies: {e}")
-
-
-def test_multi_output_target():
-    """Test MultiOutputActionTarget implementation."""
-    try:
-        from voice_typing.interfaces.output_action import MultiOutputActionTarget, CallbackOutputActionTarget
-        
-        # Create multiple callback targets
-        calls1 = []
-        calls2 = []
-        
-        def callback1(text, metadata):
-            calls1.append((text, metadata))
-        
-        def callback2(text, metadata):
-            calls2.append((text, metadata))
-        
-        target1 = CallbackOutputActionTarget()
-        target1.initialize({'callback': callback1})
-        
-        target2 = CallbackOutputActionTarget()
-        target2.initialize({'callback': callback2})
-        
-        # Create multi-target
-        multi_target = MultiOutputActionTarget([target1, target2])
-        assert multi_target.initialize({}) == True
-        assert multi_target.is_available() == True
-        
-        # Test delivery to all targets
-        metadata = {'test': True}
-        assert multi_target.deliver_text("broadcast message", metadata) == True
-        
-        # Check both callbacks were called
-        assert len(calls1) == 1
-        assert len(calls2) == 1
-        assert calls1[0] == ("broadcast message", metadata)
-        assert calls2[0] == ("broadcast message", metadata)
-        
-        print("MultiOutputActionTarget works correctly")
-        
-    except ImportError as e:
-        pytest.skip(f"Skipping due to missing dependencies: {e}")
-
-
-def test_interfaces_exported_from_main_package():
-    """Test that interfaces are properly exported from main package."""
-    try:
-        from voice_typing import (
-            AudioInputSource,
-            OutputActionTarget,
-            StateManager,
-        )
-        
-        # Just test they can be imported - interface tests are above
-        assert AudioInputSource is not None
-        assert OutputActionTarget is not None
-        assert StateManager is not None
-        
-        print("Interfaces properly exported from main package")
-        
-    except ImportError as e:
-        pytest.skip(f"Skipping due to missing dependencies: {e}")
+if __name__ == "__main__":
+    pytest.main([__file__])

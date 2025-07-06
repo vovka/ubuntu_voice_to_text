@@ -14,7 +14,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Set up Python 3.12
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: "3.12"
 
@@ -32,20 +32,16 @@ jobs:
       run: |
         poetry install
 
+    - name: Check code formatting with black
+      run: |
+        poetry run black --check --diff .
+
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
         poetry run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         poetry run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
-
-    - name: Reformat code with Black
-      run: |
-        poetry run black .
-    
-    - name: Check code formatting with black
-      run: |
-        poetry run black --check --diff .
 
     - name: Test with pytest
       run: |
