@@ -90,6 +90,67 @@ To ensure loose coupling, flexibility, and scalability, each unit communicates w
 
 ---
 
+## High-Level Overview: How Interfaces and Queues Work Together
+
+### Modular Units
+
+The application is divided into several independent "units" (modules), each responsible for a specific part of the voice-to-text pipeline. Examples include:
+- `TrayControl`: Handles tray icon and user controls.
+- `KeyboardListener`: Detects hotkeys.
+- `SoundRecorder`: Captures audio.
+- `NoiseCancelling`: Processes audio to remove noise.
+- `VoiceRecognition`: Converts audio to text.
+- `OutputHandler`: Delivers recognized text to the user or system.
+- `SharedState`: Maintains and distributes global state.
+
+Each unit is defined by an interface, specifying what it can do and what data it sends/receives.
+
+---
+
+### Communication via Queues
+
+- **Message Passing:**
+  Units do not call each other’s methods directly. Instead, they communicate exclusively via asynchronous queues. These queues act as channels for messages, commands, and data.
+- **Input/Output Queues:**
+  Each unit exposes one or more input/output queues (e.g., `audio_output_queue`, `input_queue`). Other units send messages to these queues as needed.
+
+---
+
+### Asynchronous Operation
+
+- **Independent Execution:**
+  Every unit runs its own asynchronous loop (`run()`), where it waits for new messages on its input queue(s), processes them, and sends results to output queue(s).
+- **Parallel Processing:**
+  This design allows multiple units to operate at the same time, enabling real-time or near-real-time voice transcription and efficient resource usage.
+
+---
+
+### Example Data Flow
+
+1. `KeyboardListener` detects a hotkey and sends a “start recording” command to `SharedState`’s queue.
+2. `SoundRecorder` receives the command on its control queue, starts capturing audio, and sends audio chunks to `NoiseCancelling`'s input queue.
+3. `NoiseCancelling` processes audio and sends cleaned chunks to `VoiceRecognition`.
+4. `VoiceRecognition` transcribes audio and sends text to `OutputHandler`.
+5. `OutputHandler` delivers the text to the appropriate destination (clipboard, active window, etc.).
+
+---
+
+### Benefits
+
+- **Loose Coupling:**
+  Units are decoupled—each one only needs to know about its own queues and message formats, not the internal workings of other units.
+- **Extensibility:**
+  You can swap out or upgrade any unit (e.g., use a different speech engine or recording method) as long as it respects the same interface and queue-based protocol.
+- **Scalability:**
+  Queues make it easy to adjust, parallelize, or buffer processing between units, supporting high throughput and responsiveness.
+- **Testability:**
+  Dummy or mock units can be plugged in for testing, allowing early verification of system wiring and message flow.
+
+---
+
+**Summary:**
+Each unit in the application is an independent actor that processes messages asynchronously, communicating only through queues. This leads to a robust, modular, and flexible architecture that is easy to maintain, test, and extend.---
+
 ## What’s Not Included (Yet)
 
 - No GUI configuration editor (just a config file for now)
