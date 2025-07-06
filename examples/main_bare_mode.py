@@ -4,6 +4,10 @@ Scenario 1: The app starts, units are initialized, and they react to internal ev
 (e.g., voice detection) to record, transcribe, and output, then the application exits.
 """
 
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from dummy import *
 import asyncio
 import logging

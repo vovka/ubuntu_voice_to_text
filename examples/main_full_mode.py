@@ -5,6 +5,10 @@ publishes events, with other units reacting to these events to manage recording,
 and output. Exiting is typically via the tray menu.
 """
 
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from dummy import *
 from voice_typing.keyboard_listener.linux_keyboard_listener import LinuxKeyboardListener
 import asyncio
