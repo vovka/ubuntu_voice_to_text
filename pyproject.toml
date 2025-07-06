@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "ubuntu-voice-to-text"
+version = "0.1.0"
+description = "An elegant voice-to-text transcriber for Ubuntu"
+authors = ["Your Name <your.email@example.com>"]
+readme = "README.md"
+packages = [{include = "interfaces"}, {include = "dummy"}]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
+pytest-asyncio = "^0.21.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
