@@ -29,22 +29,22 @@ except ImportError as e:
         shift_r = 'shift_r'
         alt_l = 'alt_l'
         alt_r = 'alt_r'
-    
+
     class KeyCode:
         @staticmethod
         def from_char(char):
             return f'key_{char}'
-    
+
     class keyboard:
         class Listener:
             def __init__(self, on_press=None, on_release=None):
                 self.on_press = on_press
                 self.on_release = on_release
                 self.running = False
-            
+
             def start(self):
                 raise ImportError("pynput not available")
-            
+
             def stop(self):
                 pass
 
@@ -54,7 +54,7 @@ logger = logging.getLogger(__name__)
 class LinuxKeyboardListener(IKeyboardListener):
     """
     Linux implementation of IKeyboardListener using pynput for global hotkey detection.
-    
+
     This class listens for the Ctrl+Shift+Alt+A hotkey combination and publishes
     events to the output queue when detected. It toggles between start and stop
     recording events.
@@ -64,6 +64,7 @@ class LinuxKeyboardListener(IKeyboardListener):
         self,
         config: Optional[Dict[str, Any]] = None,
         output_queue: Optional[QueueProtocol] = None,
+        loop: Optional[asyncio.AbstractEventLoop] = None,
     ):
         """Initialize Linux keyboard listener with pynput integration."""
         self._config = config or {}
@@ -72,13 +73,15 @@ class LinuxKeyboardListener(IKeyboardListener):
         self._listener = None
         self._current_keys = set()
         self._target_hotkey = {Key.ctrl_l, Key.shift_l, Key.alt_l, KeyCode.from_char('a')}
-        
+
         # Alternative keys for right-side modifiers
         self._target_hotkey_alt = {Key.ctrl_r, Key.shift_r, Key.alt_r, KeyCode.from_char('a')}
-        
+
         # Toggle state for recording
         self._recording_state = False
-        
+        # Store the loop reference - will be set in run() method if not provided
+        self._loop = loop
+
         logger.info(
             f"LinuxKeyboardListener initialized with config: {self._config}, "
             f"using output_queue: {id(self._output_queue)}"
@@ -92,20 +95,22 @@ class LinuxKeyboardListener(IKeyboardListener):
     def _on_press(self, key):
         """Handle key press events from pynput listener."""
         try:
+            logger.debug(f"LinuxKeyboardListener: Key pressed: {key}")
             self._current_keys.add(key)
-            
+
             # Check if our target hotkey combination is pressed
             if self._is_target_hotkey_pressed():
                 # Use asyncio.create_task to schedule the coroutine
-                asyncio.create_task(self._send_hotkey_event())
+                asyncio.run_coroutine_threadsafe(self._send_hotkey_event(), self._loop)
                 logger.info("LinuxKeyboardListener detected hotkey: Ctrl+Shift+Alt+A")
-                
+
         except Exception as e:
             logger.error(f"LinuxKeyboardListener error in _on_press: {e}")
 
     def _on_release(self, key):
         """Handle key release events from pynput listener."""
         try:
+            logger.debug(f"LinuxKeyboardListener: Key released: {key}")
             # Remove the key from current pressed keys
             self._current_keys.discard(key)
         except Exception as e:
@@ -120,7 +125,7 @@ class LinuxKeyboardListener(IKeyboardListener):
         # Check for mixed modifiers + 'a'
         mixed_combo_1 = {Key.ctrl_l, Key.shift_l, Key.alt_r, KeyCode.from_char('a')}
         mixed_combo_2 = {Key.ctrl_r, Key.shift_l, Key.alt_l, KeyCode.from_char('a')}
-        
+
         return (
             left_combo.issubset(self._current_keys) or
             right_combo.issubset(self._current_keys) or
@@ -138,7 +143,7 @@ class LinuxKeyboardListener(IKeyboardListener):
             else:
                 hotkey_event = "ctrl+shift+start_recording"
                 self._recording_state = True
-                
+
             await self._output_queue.put(hotkey_event)
             logger.info(f"LinuxKeyboardListener sent event: {hotkey_event}")
         except Exception as e:
@@ -150,6 +155,10 @@ class LinuxKeyboardListener(IKeyboardListener):
         """
         logger.info("LinuxKeyboardListener.run() started")
         self._running = True
+        
+        # Set the event loop if not provided during initialization
+        if self._loop is None:
+            self._loop = asyncio.get_running_loop()
 
         try:
             # Start the pynput listener in a separate thread
@@ -161,20 +170,20 @@ class LinuxKeyboardListener(IKeyboardListener):
                     await self._output_queue.put("ctrl+shift+start_recording")
                     logger.info("LinuxKeyboardListener sent fallback event")
                 return
-                
+
             self._listener = keyboard.Listener(
                 on_press=self._on_press,
                 on_release=self._on_release
             )
-            
+
             # Start the listener in a separate thread
             self._listener.start()
             logger.info("LinuxKeyboardListener: pynput listener started")
-            
+
             # Keep the async task running while the listener is active
-            while self._running and self._listener.running:
-                await asyncio.sleep(0.1)  # Small sleep to prevent busy waiting
-                
+            # Use asyncio.to_thread to run the blocking join() method without blocking the event loop
+            await asyncio.to_thread(self._listener.join)
+
         except Exception as e:
             logger.error(f"LinuxKeyboardListener.run() error: {e}")
             # If pynput fails, fall back to a simple event for testing

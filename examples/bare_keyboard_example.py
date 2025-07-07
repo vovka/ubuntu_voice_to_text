@@ -17,7 +17,7 @@ import signal
 from voice_typing.keyboard_listener.linux_keyboard_listener import LinuxKeyboardListener
 
 # Setup logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
@@ -52,7 +52,8 @@ async def main():
     # Create keyboard listener
     keyboard_listener = LinuxKeyboardListener(
         config={"hotkeys": ["ctrl+shift+alt+a"]},
-        output_queue=keyboard_events_queue
+        output_queue=keyboard_events_queue,
+        loop=asyncio.get_running_loop()
     )
     
     # Flag to control the main loop

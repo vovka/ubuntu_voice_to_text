@@ -2,22 +2,27 @@ FROM python:3.12-slim
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    python3-dev \
-    xdotool \
-    pulseaudio \
-    alsa-utils \
-    portaudio19-dev \
-    wget \
-    curl \
-    unzip \
-    python3-pil \
-    gcc \
-    build-essential \
-    linux-headers-amd64 \
-    ffmpeg \
-    libsndfile1 \
-    libjpeg-dev \
-    && rm -rf /var/lib/apt/lists/*
+  python3-dev \
+  xdotool \
+  pulseaudio \
+  alsa-utils \
+  portaudio19-dev \
+  wget \
+  curl \
+  unzip \
+  python3-pil \
+  gcc \
+  build-essential \
+  linux-headers-amd64 \
+  ffmpeg \
+  libsndfile1 \
+  libjpeg-dev \
+  xinput \
+  evtest \
+  && rm -rf /var/lib/apt/lists/*
+
+# Ensure the 'input' group exists with the correct GID for keyboard access
+RUN groupadd -g 107 -o input || true
 
 # Create application directory
 WORKDIR /app
@@ -26,7 +31,8 @@ WORKDIR /app
 RUN pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org poetry
 
 # Copy Poetry configuration files first for better layer caching
-COPY pyproject.toml poetry.lock ./
+# COPY pyproject.toml poetry.lock ./
+COPY pyproject.toml ./
 
 # Configure Poetry to not create virtual environment (we'll use the system Python)
 RUN poetry config virtualenvs.create false
@@ -43,15 +49,15 @@ RUN if [ "$INSTALL_DEV_DEPS" = "true" ]; then \
 # RUN poetry install --only=main --no-root -v
 
 # Copy application files
-COPY main.py .
+# COPY main.py .
 COPY tests/ tests/
 COPY voice_typing/ voice_typing/
 COPY scripts/ scripts/
 
-# Make entrypoint executable
-RUN chmod +x scripts/docker-entrypoint.sh
+# # Make entrypoint executable
+# RUN chmod +x scripts/docker-entrypoint.sh
 
-# Install the package in development mode
+# # Install the package in development mode
 # RUN poetry install --no-root
 
 # Set environment variables for audio and display
@@ -62,5 +68,5 @@ RUN chmod +x scripts/docker-entrypoint.sh
 
 # Expose any necessary ports (none needed for this app)
 
-# Set the entrypoint
-ENTRYPOINT ["/app/scripts/docker-entrypoint.sh"]
+# # Set the entrypoint
+# ENTRYPOINT ["/app/scripts/docker-entrypoint.sh"]

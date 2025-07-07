@@ -37,7 +37,9 @@ async def main():
 
     # Create units for keyboard mode (no tray control)
     keyboard_listener = LinuxKeyboardListener(
-        config={"hotkeys": ["ctrl+shift+r"]}, output_queue=hotkey_events_queue
+        config={"hotkeys": ["ctrl+shift+r"]},
+        output_queue=hotkey_events_queue,
+        loop=asyncio.get_running_loop()
     )
 
     sound_recorder = DummySoundRecorder(
