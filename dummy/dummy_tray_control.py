@@ -56,10 +56,6 @@ class DummyTrayControl(ITrayControl):
                     # Periodically log activity to show the unit is alive
                     logger.info("DummyTrayControl is alive - no commands received")
 
-                    # Simulate putting a test command
-                    await self._input_queue.put("test_tray_command")
-                    logger.info("DummyTrayControl put test tray command")
-
         except asyncio.CancelledError:
             logger.info("DummyTrayControl.run() cancelled")
             self._running = False

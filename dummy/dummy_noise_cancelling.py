@@ -75,13 +75,6 @@ class DummyNoiseCancelling(INoiseCancelling):
                     # Periodically log activity to show the unit is alive
                     logger.info("DummyNoiseCancelling is alive - no audio received")
 
-                    # Simulate putting test audio
-                    test_audio = f"test_raw_audio_{asyncio.get_event_loop().time()}"
-                    await self._audio_input_queue.put(test_audio)
-                    logger.info(
-                        f"DummyNoiseCancelling put test raw audio: {test_audio}"
-                    )
-
         except asyncio.CancelledError:
             logger.info("DummyNoiseCancelling.run() cancelled")
             self._running = False

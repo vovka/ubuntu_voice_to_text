@@ -6,6 +6,7 @@ react to. The app idles until hotkeys trigger actions, and remains alive until e
 
 import sys
 import os
+import signal
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from dummy import *
@@ -16,28 +17,42 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Global flag for graceful shutdown
+shutdown_requested = False
+
+
+def signal_handler(signum, frame):
+    """Handle Ctrl+C gracefully"""
+    global shutdown_requested
+    logger.info("Ctrl+C pressed - requesting shutdown...")
+    shutdown_requested = True
+
 
 async def main():
     """
     Keyboard mode: Keyboard enabled, tray disabled. The app waits for hotkeys
     and triggers actions based on keyboard events.
     """
+    global shutdown_requested
+    
+    # Set up signal handler for Ctrl+C
+    signal.signal(signal.SIGINT, signal_handler)
+    
     logger.info("Starting Keyboard Mode (Keyboard Enabled, No Tray)")
+    logger.info("Press Ctrl+Shift+Alt+A to toggle recording, Ctrl+C to exit")
 
     # Create shared queues for the pipeline
-    hotkey_events_queue = (
-        asyncio.Queue()
-    )  # keyboard_listener -> sound_recorder, shared_state
-    sound_control_queue = (
-        asyncio.Queue()
-    )  # receives control commands for sound_recorder
+    hotkey_events_queue = asyncio.Queue()  # keyboard_listener -> bridge
+    sound_control_queue = asyncio.Queue()  # bridge -> sound_recorder
     audio_pipeline_queue = asyncio.Queue()  # sound_recorder -> noise_cancelling
     clean_audio_queue = asyncio.Queue()  # noise_cancelling -> voice_recognition
     recognized_text_queue = asyncio.Queue()  # voice_recognition -> output_handler
+    tray_control_queue = asyncio.Queue()  # bridge -> tray_control
+    shared_state_queue = asyncio.Queue()  # bridge -> shared_state
 
-    # Create units for keyboard mode (no tray control)
+    # Create units for keyboard mode
     keyboard_listener = LinuxKeyboardListener(
-        config={"hotkeys": ["ctrl+shift+r"]},
+        config={"hotkeys": ["ctrl+shift+alt+a"]},
         output_queue=hotkey_events_queue,
         loop=asyncio.get_running_loop()
     )
@@ -61,43 +76,53 @@ async def main():
     )
 
     output_handler = DummyOutputHandler(
-        config={"output_type": "clipboard"}, input_queue=recognized_text_queue
+        config={"output_type": "clipboard"}, 
+        input_queue=recognized_text_queue
+    )
+
+    tray_control = DummyTrayControl(
+        config={"enabled": False},
+        input_queue=tray_control_queue
     )
 
     shared_state = DummySharedState()
 
-    # Create a bridge task to handle hotkey events
+    # Create a bridge task to handle keyboard events and orchestrate the pipeline
     async def keyboard_event_bridge():
         """Bridge task to handle keyboard events and control the pipeline."""
-        while True:
+        recording_state = False
+        
+        while not shutdown_requested:
             try:
-                hotkey_event = await hotkey_events_queue.get()
+                hotkey_event = await asyncio.wait_for(hotkey_events_queue.get(), timeout=0.5)
                 logger.info(f"Keyboard mode: Received hotkey event '{hotkey_event}'")
 
-                # Convert hotkey events to appropriate actions
-                if "start_recording" in hotkey_event:
-                    await sound_control_queue.put("start_recording")
-                    await shared_state.state_queue.put("state_change:recording")
-                    logger.info("Keyboard mode: Started recording via hotkey")
+                # Toggle recording state
+                if "start_recording" in hotkey_event or "stop_recording" in hotkey_event:
+                    recording_state = not recording_state
+                    
+                    if recording_state:
+                        # Start recording pipeline
+                        await sound_control_queue.put("start_recording")
+                        await tray_control_queue.put("state_change:recording")
+                        await shared_state.state_queue.put("state_change:recording")
+                        logger.info(">>> RECORDING STARTED - Pipeline active")
+                    else:
+                        # Stop recording pipeline
+                        await sound_control_queue.put("stop_recording")
+                        await tray_control_queue.put("state_change:idle")
+                        await shared_state.state_queue.put("state_change:idle")
+                        logger.info(">>> RECORDING STOPPED - Pipeline idle")
 
-                elif "stop_recording" in hotkey_event:
-                    await sound_control_queue.put("stop_recording")
-                    await shared_state.state_queue.put("state_change:idle")
-                    logger.info("Keyboard mode: Stopped recording via hotkey")
-
-                # Also track hotkey events in shared state
+                # Track hotkey events in shared state
                 await shared_state.state_queue.put(f"hotkey_event:{hotkey_event}")
 
+            except asyncio.TimeoutError:
+                # Check for shutdown periodically
+                continue
             except asyncio.CancelledError:
                 logger.info("Keyboard mode: Event bridge stopped")
                 break
-
-    # Simulate exit hotkey handling
-    async def exit_handler():
-        """Handle exit condition - in real app this would be a specific hotkey."""
-        await asyncio.sleep(12)  # Let the app run for a while
-        logger.info("Keyboard mode: Simulating exit hotkey (Ctrl+Shift+Q)")
-        await shared_state.state_queue.put("hotkey_event:exit")
 
     # Start all units
     units = [
@@ -106,17 +131,23 @@ async def main():
         noise_cancelling,
         voice_recognition,
         output_handler,
+        tray_control,
         shared_state,
     ]
 
     logger.info("Starting keyboard mode units...")
     tasks = [asyncio.create_task(unit.run()) for unit in units]
     bridge_task = asyncio.create_task(keyboard_event_bridge())
-    exit_task = asyncio.create_task(exit_handler())
 
-    # Let the system run (keyboard mode stays alive until explicitly exited)
-    logger.info("Keyboard mode running - waiting for hotkeys...")
-    await asyncio.sleep(15)
+    try:
+        # Let the system run until shutdown is requested
+        logger.info("Keyboard mode running - waiting for hotkeys...")
+        while not shutdown_requested:
+            await asyncio.sleep(0.1)
+            
+    except KeyboardInterrupt:
+        logger.info("KeyboardInterrupt received")
+        shutdown_requested = True
 
     # Clean shutdown
     logger.info("Keyboard mode shutting down...")
@@ -128,12 +159,11 @@ async def main():
 
     # Cancel all tasks
     bridge_task.cancel()
-    exit_task.cancel()
     for task in tasks:
         task.cancel()
 
     # Wait for all tasks to complete
-    await asyncio.gather(bridge_task, exit_task, *tasks, return_exceptions=True)
+    await asyncio.gather(bridge_task, *tasks, return_exceptions=True)
 
     logger.info("Keyboard mode completed")
 

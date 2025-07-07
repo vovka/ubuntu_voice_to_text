@@ -89,11 +89,6 @@ class DummySoundRecorder(ISoundRecorder):
                             f"DummySoundRecorder put audio chunk: {audio_chunk}"
                         )
 
-                    # Put a test control command occasionally
-                    if not self._recording:
-                        await self._control_queue.put("test_control_command")
-                        logger.info("DummySoundRecorder put test control command")
-
         except asyncio.CancelledError:
             logger.info("DummySoundRecorder.run() cancelled")
             self._running = False

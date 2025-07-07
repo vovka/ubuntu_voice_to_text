@@ -53,10 +53,6 @@ class DummySharedState(ISharedState):
                     # Periodically log activity to show the unit is alive
                     logger.info("DummySharedState is alive - no state events received")
 
-                    # Simulate putting a test state event
-                    await self._state_queue.put("test_state_event")
-                    logger.info("DummySharedState put test state event")
-
         except asyncio.CancelledError:
             logger.info("DummySharedState.run() cancelled")
             self._running = False
