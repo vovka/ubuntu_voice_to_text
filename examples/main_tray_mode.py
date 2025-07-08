@@ -4,6 +4,10 @@ Scenario 2: The tray icon reflects the app's state, updated by messages from the
 Otherwise, it operates similarly to bare mode, with units reacting to events.
 """
 
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from dummy import *
 import asyncio
 import logging

@@ -62,13 +62,6 @@ class DummyOutputHandler(IOutputHandler):
                     # Periodically log activity to show the unit is alive
                     logger.info("DummyOutputHandler is alive - no text received")
 
-                    # Simulate putting test text
-                    test_text = (
-                        f"test_recognized_text_{asyncio.get_event_loop().time()}"
-                    )
-                    await self._input_queue.put(test_text)
-                    logger.info(f"DummyOutputHandler put test text: {test_text}")
-
         except asyncio.CancelledError:
             logger.info("DummyOutputHandler.run() cancelled")
             self._running = False

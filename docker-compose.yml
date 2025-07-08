@@ -6,45 +6,67 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: ubuntu-voice-to-text
+    # Use host networking to allow access to host network and input devices
     network_mode: host
-    # privileged: true # looks like it is working without this
+    # Run container in privileged mode to allow access to input devices (required for /dev/input access)
+    privileged: true
+    # Run the container as the current host user for correct file/device permissions
     user: "${UID}:${GID}"
+    group_add:
+      - input
     environment:
+      # Set XAUTHORITY for X11 authentication (needed if using X11 for GUI or input capture)
+      - XAUTHORITY=/tmp/.docker.xauthority
+
+      # Set DISPLAY for X11 GUI access from container
       - DISPLAY=${DISPLAY}
-      - PULSE_RUNTIME_PATH=/run/user/1000/pulse
-      - XDG_RUNTIME_DIR=/run/user/1000
-      - XAUTHORITY=/home/${USER}/.Xauthority
-      # Voice recognition configuration
-      - RECOGNITION_SOURCE=${RECOGNITION_SOURCE:-vosk}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - WHISPER_MODEL=${WHISPER_MODEL:-gpt-4o-transcribe}
+
+      # (Optional) Set PulseAudio runtime path for audio access
+      # - PULSE_RUNTIME_PATH=/run/user/${UID}/pulse
+
+      # (Optional) Set XDG_RUNTIME_DIR for desktop session integration
+      # - XDG_RUNTIME_DIR=/run/user/${UID}
+
+      # (Optional) Voice recognition configuration variables
+      # - RECOGNITION_SOURCE=${RECOGNITION_SOURCE:-vosk}
+      # - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # - WHISPER_MODEL=${WHISPER_MODEL:-gpt-4o-transcribe}
     volumes:
-      # X11 socket for GUI access
+      # Mount X11 authority file for GUI/input authentication
+      - ${XAUTHORITY}:/tmp/.docker.xauthority:rw
+
+      # Mount X11 socket for GUI/input event access
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
-      # PulseAudio socket for audio access
-      - /run/user/1000/pulse:/run/user/1000/pulse:rw
-      # Alternative audio device access
-      - /dev/snd:/dev/snd:rw
-      - /home/${USER}/.Xauthority:/home/${USER}/.Xauthority:rw
-      # Vosk model persistence directory (now as a named volume). Also need to chown in host OS (since this container runs as non-root user):
-      # `sudo chown -R $(id -u):$(id -g) /var/lib/docker/volumes/ubuntu_voice_to_text_vosk-models/_data`
-      - vosk-models:/models:rw
+
+      # (Optional) Mount PulseAudio socket for audio access
+      # - /run/user/${UID}/pulse:/run/user/${UID}/pulse:rw
+
+      # (Optional) Mount host audio devices for direct audio access
+      # - /dev/snd:/dev/snd:rw
+
+    # (Optional) Expose host input devices to container for keyboard event capture
     devices:
-      # Audio devices
-      - /dev/snd:/dev/snd
-    stdin_open: true
-    tty: true
-    restart: unless-stopped
+      - /dev/input/event3:/dev/input/event3
+      - /dev/input/event6:/dev/input/event6
+      - /dev/input/event11:/dev/input/event11
+      - /dev/input/event12:/dev/input/event12
+
+    stdin_open: true  # Keep STDIN open for interactive processes
+    tty: true         # Allocate a pseudo-TTY for the container
+    restart: unless-stopped  # Restart container unless explicitly stopped
 
   # Test runner service
   test:
+    # Build the Docker image for testing with dev dependencies
     build:
       context: .
       dockerfile: Dockerfile
       args:
         INSTALL_DEV_DEPS: "true"
     container_name: ubuntu-voice-to-text-test
+    # Run the test command
     command: ["test"]
+    # Mount source code as read-only for testing
     volumes:
       - .:/app/src:ro  # Mount source for development
     profiles:
@@ -52,11 +74,14 @@ services:
 
   # Lint runner service
   lint:
+    # Build the Docker image for linting
     build:
       context: .
       dockerfile: Dockerfile
     container_name: ubuntu-voice-to-text-lint
+    # Run the lint command
     command: ["lint"]
+    # Mount source code as read-only for linting
     volumes:
       - .:/app/src:ro  # Mount source for development
     profiles:
@@ -64,16 +89,20 @@ services:
 
   # Code formatter service
   format:
+    # Build the Docker image for formatting
     build:
       context: .
       dockerfile: Dockerfile
     container_name: ubuntu-voice-to-text-format
+    # Run the format command
     command: ["format"]
+    # Mount source code as read-write for formatting
     volumes:
       - .:/app/src:rw  # Mount source for writing formatted files
     profiles:
       - test
 
-volumes:
-  vosk-models:
-    driver: local
+# (Optional) Named volume for persistent Vosk models
+# volumes:
+#   # vosk-models:
+#   #   driver: local
